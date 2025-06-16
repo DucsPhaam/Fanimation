@@ -55,7 +55,7 @@ $stmt->close();
         <h1 class="text-3xl font-bold mb-5">Đặt Hàng Thành Công</h1>
         <p class="mb-4 text-green-500">Cảm ơn bạn đã đặt hàng! Đơn hàng #<?php echo htmlspecialchars($order_id); ?> đã được ghi nhận.</p>
         <p class="mb-4">Chúng tôi sẽ xử lý và giao hàng sớm nhất có thể.</p>
-        <a href="index.php" class="bg-blue-500 text-white px-4 py-2 rounded">Quay Lại Trang Chủ</a>
+        <a href="<?php echo $index_url; ?>" class="bg-blue-500 text-white px-4 py-2 rounded">Quay Lại Trang Chủ</a>
     </div>
     <?php include $footer_url; ?>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
