@@ -1,5 +1,7 @@
 <?php
 include $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/includes/config.php';
+require_once $db_connect_url;
+include $header_url;
 // Bật hiển thị lỗi để debug (chỉ dùng trong môi trường phát triển)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -8,11 +10,8 @@ error_reporting(E_ALL);
 // Bắt đầu buffer để kiểm soát đầu ra
 ob_start();
 
-require_once $db_connect_url;
-include $header_url;
-
 // Kiểm tra xem người dùng đã đăng nhập chưa
-if (isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
@@ -154,15 +153,40 @@ while ($row = mysqli_fetch_assoc($orders_result)) {
 mysqli_stmt_close($stmt);
 
 ?>
+<style>
+/* Tất cả các tab mặc định */
+.nav-tabs .nav-link {
+    background-color: white;
+    color: #374151; /* xám đậm */
+    font-weight: 500;
+    margin-right: 0.5rem;
+}
 
+/* Khi hover vào tab */
+.nav-tabs .nav-link:hover {
+    background-color: #e0e7ff;
+    color: #1e3a8a;
+}
+
+/* Tab đang được chọn */
+.nav-tabs .nav-link.active {
+    background-color: #2563eb; /* xanh dương */
+    color: white;
+    font-weight: 600;
+    border-color: #2563eb #2563eb #fff;
+}
+</style>
 <div class="container mx-auto p-6">
-    <!-- Tab navigation -->
     <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">Thông tin cá nhân</button>
+            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">
+                Thông tin cá nhân
+            </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab" aria-controls="orders" aria-selected="false">Danh sách đơn hàng</button>
+            <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab" aria-controls="orders" aria-selected="false">
+                Danh sách đơn hàng
+            </button>
         </li>
     </ul>
 
