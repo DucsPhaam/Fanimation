@@ -1,9 +1,6 @@
 <?php
-require_once 'includes/db_connect.php';
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+include $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/includes/config.php';
+require_once $db_connect_url;
 
 // Kiểm tra đăng nhập
 if (!isset($_SESSION['user_id'])) {
@@ -105,38 +102,99 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 ?>
+<style>
+    /* Tăng chiều cao input và bo góc */
+    input, select, textarea {
+        padding: 5px;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    input:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+        border-color: #6366f1;
+    }
+
+    .form-container {
+        max-width: 600px;
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        margin: auto;
+    }
+
+    .form-title {
+        font-size: 1.75rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        color: #1e293b;
+    }
+
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #374151;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-submit {
+        background-color: #4f46e5;
+        color: white;
+        padding: 0.75rem;
+        font-weight: bold;
+        border-radius: 0.75rem;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+
+    .form-submit:hover {
+        background-color: #4338ca;
+    }
+
+    #message {
+        margin-top: 1rem;
+        font-weight: 600;
+    }
+</style>
 
 <div class="container mx-auto p-6">
-        <h1 class="text-2xl font-bold mb-6 text-center">Chỉnh sửa thông tin cá nhân</h1>
-        <form id="profileForm" class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
-            <div class="mb-4">
-                <label for="name" class="block text-sm font-medium text-gray-700">Họ và tên</label>
-                <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($user['name']); ?>" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-            </div>
-            <div class="mb-4">
-                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-            </div>
-            <div class="mb-4">
-                <label for="phone" class="block text-sm font-medium text-gray-700">Số điện thoại</label>
-                <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-            </div>
-            <div class="mb-4">
-                <label for="address" class="block text-sm font-medium text-gray-700">Địa chỉ</label>
-                <input type="text" id="address" name="address" value="<?php echo htmlspecialchars($user['address'] ?? ''); ?>" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-            </div>
-            <div class="mb-4">
-                <label for="city" class="block text-sm font-medium text-gray-700">Thành phố</label>
-                <input type="text" id="city" name="city" value="<?php echo htmlspecialchars($user['city'] ?? ''); ?>" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-            </div>
-            <div class="mb-4">
-                <label for="password" class="block text-sm font-medium text-gray-700">Mật khẩu mới (để trống nếu không muốn thay đổi)</label>
-                <input type="password" id="password" name="password" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-            </div>
-            <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700">Cập nhật</button>
-        </form>
-        <div id="message" class="mt-4 text-center"></div>
-    </div>
+    <h1 class="form-title">Chỉnh sửa thông tin cá nhân</h1>
+    <form id="profileForm" class="form-container">
+        <div class="form-group">
+            <label for="name" class="form-label">Họ và tên</label>
+            <input type="text" id="name" name="name" value="<?= htmlspecialchars($user['name']) ?>" class="w-full border border-gray-300">
+        </div>
+        <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" id="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" class="w-full border border-gray-300">
+        </div>
+        <div class="form-group">
+            <label for="phone" class="form-label">Số điện thoại</label>
+            <input type="text" id="phone" name="phone" value="<?= htmlspecialchars($user['phone'] ?? '') ?>" class="w-full border border-gray-300">
+        </div>
+        <div class="form-group">
+            <label for="address" class="form-label">Địa chỉ</label>
+            <input type="text" id="address" name="address" value="<?= htmlspecialchars($user['address'] ?? '') ?>" class="w-full border border-gray-300">
+        </div>
+        <div class="form-group">
+            <label for="city" class="form-label">Thành phố</label>
+            <input type="text" id="city" name="city" value="<?= htmlspecialchars($user['city'] ?? '') ?>" class="w-full border border-gray-300">
+        </div>
+        <div class="form-group">
+            <label for="password" class="form-label">Mật khẩu mới (để trống nếu không muốn thay đổi)</label>
+            <input type="password" id="password" name="password" class="w-full border border-gray-300">
+        </div>
+        <button type="submit" class="form-submit">Cập nhật</button>
+    </form>
+    <div id="message" class="text-center"></div>
+</div>
+
     <script>
         document.getElementById('profileForm').addEventListener('submit', async function (e) {
             e.preventDefault();
