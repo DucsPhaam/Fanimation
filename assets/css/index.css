@@ -1,0 +1,264 @@
+/* CSS hiện có */
+.plx-image1 {
+  background-image: url(../images/banners/kwartet_video_hero.jpg);
+  text-align: center;
+  width: 100%;
+  height: 600px;
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.plx-image1 video {
+  width: 600px;
+  float: right;
+  padding: 50px;
+  margin-right: 50px;
+}
+
+.plx-image2 {
+  background-image: url(../images/banners/air-apparent-banner-bkgr-2.jpg);
+  text-align: center;
+  width: 100%;
+  height: 600px;
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+}
+
+.content-1 {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+}
+
+.content-1 p {
+    text-align: center;
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 30px;
+}
+
+.intro-content-1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.content1-fan-img img {
+    width: 50%;
+    height: auto;
+    display: block;
+}
+
+.content1-intro {
+    flex: 1;
+    text-align: left;
+    width: 50%;
+}
+
+.content1-intro span {
+    display: block;
+    color: #333;
+    font-size: 14px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.content1-intro h4 {
+    color: #333;
+    font-size: 24px;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
+
+.content1-intro h6 {
+    color: #666;
+    font-size: 14px;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+}
+
+.content1-intro button {
+    background-color: #5a2a6a;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.content1-intro button:hover {
+    background-color: #4a1a5a;
+}
+
+.content1-banner {
+  width: 50%;
+  float: right;
+}
+
+.content1-banner img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.content-2 {
+  display: flex;
+  justify-content: center;
+  padding: 80px;
+}
+
+.content-2 img {
+  width: 45vw;
+  padding: 0 20px;
+}
+
+.box-content {
+  width: 500px;
+  background-color: rgba(146, 36, 146, 0.5);
+  padding: 50px;
+  margin-left: 100px;
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 200px 100px;
+}
+
+.content1-fan-img, .content-2 a, .product-card {
+    position: relative;
+    transition: transform 0.8s ease-out, opacity 0.8s ease-out;
+}
+
+.content1-fan-img {
+    opacity: 0;
+    transform: translateX(-100%);
+}
+
+.content1-fan-img.animate {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.content-2 a:nth-child(1) {
+    opacity: 0;
+    transform: translateX(-100%);
+}
+
+.content-2 a:nth-child(2) {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+.content-2 a:nth-child(1).animate, 
+.content-2 a:nth-child(2).animate {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Sticky footer */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+footer {
+    flex-shrink: 0;
+    width: 100%;
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+footer .container {
+    padding: 20px 0;
+}
+
+footer a {
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+#map iframe {
+    max-width: 100%;
+    height: 180px;
+    border: 0;
+}
+
+/* Kiểu cho sản phẩm nổi bật */
+.featured-products {
+    margin-top: 40px;
+    padding: 20px 0;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.product-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(50px); /* Trượt từ dưới lên */
+}
+
+.product-card.animate {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.product-image {
+    max-width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.product-name {
+    font-size: 18px;
+    color: #333;
+    margin: 10px 0;
+    font-weight: 600;
+}
+
+.product-price {
+    font-size: 16px;
+    color: #5a2a6a;
+    margin-bottom: 15px;
+}
+
+.btn-primary {
+    background-color: #5a2a6a;
+    color: #fff;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #4a1a5a;
+}

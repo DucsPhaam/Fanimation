@@ -1,0 +1,91 @@
+     .required::after {
+        content: " *";
+        color: #a94442;
+    }
+
+    .search-container {
+        position: relative;
+    }
+
+    #searchInput {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    #suggestions {
+        display: none;
+        position: absolute;
+        width: 100%;
+        border: 1px solid #ccc;
+        background-color: #fff;
+        max-height: 150px;
+        overflow-y: auto;
+        z-index: 1;
+    }
+
+    #suggestions div {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    #suggestions div:hover {
+        background-color: #f0f0f0;
+    }
+
+    /* upload file or images */
+    .drag-area {
+        border: 2px dashed #ccc;
+        height: auto;
+        width: 100%;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 20px;
+        background-color: #f9f9f9;
+        color: #666;
+    }
+
+    .drag-area.active {
+        border: 2px solid #007bff;
+        background-color: #e9f0f8;
+    }
+
+    .drag-area header {
+        font-size: 18px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .drag-area span {
+        font-size: 14px;
+        font-weight: 400;
+        color: #666;
+        margin: 10px 0;
+    }
+
+    .drag-area img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+    .bttsubmit {
+        background-color: #922492; /* Màu nền đậm hơn */
+        border: none;
+        padding: 0.7rem;
+        width: 6rem;
+        border-radius: 3px;
+        font-weight: bold;
+        color: #fff;
+        opacity: 1; /* Đảm bảo opacity không bị mờ */
+        cursor: pointer; /* Thêm con trỏ tay khi hover */
+    }
+
+    .bttsubmit:hover {
+        background-color: #520a52; /* Màu khi hover */
+    }
