@@ -111,20 +111,22 @@ $search = isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '';
 
             <!-- profile -->
             <div class="user-dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-label="User menu">
+                <a class="nav-link dropdown-toggle" href="../" data-bs-toggle="dropdown" aria-label="User menu">
                     <i class="bi bi-person-circle"></i>
                 </a>
                 <?php 
                 if(!isset($_SESSION["user_id"])){
                 ?>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="<?php echo $login_url; ?>">Đăng nhập</a></li>
-                    <li><a class="dropdown-item" href="<?php echo $register_url; ?>">Đăng Ký</a></li>
+                    <li><a class="dropdown-item" href="<?php echo $login_url; ?>">Log In</a></li>
+                    <li><a class="dropdown-item" href="<?php echo $register_url; ?>">Register</a></li>
+                    <li><a class="dropdown-item" href="<?php echo $my_order_url; ?>">My Order</a></li>
                 </ul>
                 <?php }else{?>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="<?php echo $logout_url; ?>">Đăng xuất</a></li>
-                    <li><a class="dropdown-item" href="<?php echo $profile_url; ?>">Thông tin tài khoản</a></li>
+                    <li><a class="dropdown-item" href="<?php echo $logout_url; ?>">Log Out</a></li>
+                    <li><a class="dropdown-item" href="<?php echo $profile_url; ?>">Profile Information</a></li>
+                    <li><a class="dropdown-item" href="<?php echo $my_order_url; ?>">My Order</a></li>
                 </ul>
                 <?php }?>
             </div>
