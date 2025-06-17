@@ -4,7 +4,15 @@ include $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/includes/config.php';
 require $db_connect_url;
 include $header_url;
 
-// Xử lý gửi đánh giá
+// Khởi tạo session_id cho khách vãng lai nếu chưa có
+if (session_id() === '') {
+    session_start();
+}
+if (!isset($_SESSION['guest_session_id'])) {
+    $_SESSION['guest_session_id'] = session_id();
+}
+
+// Xử lý gửi đánh giá (giữ nguyên, chỉ cho phép người dùng đăng nhập)
 $success = '';
 $error = '';
 $product_id = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -298,7 +306,7 @@ if ($stmt === false) {
                 </div>
 
                 <button class="btn btn-danger add-to-cart"
-                    data-id="<?php echo $product['product_id']; ?>" disabled>
+                    data-id="<?php echo $product['product_id']; ?>">
                     MUA NGAY
                 </button>
             </div>
@@ -371,9 +379,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const addToCartButton = document.querySelector('.add-to-cart');
     let selectedColorId = null;
 
-    // Vô hiệu hóa nút "MUA NGAY" ban đầu
-    addToCartButton.disabled = true;
-
     document.querySelectorAll('.color-circle').forEach(circle => {
         circle.addEventListener('click', function() {
             selectedColorId = this.getAttribute('data-color-id');
@@ -383,9 +388,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Cập nhật giao diện màu được chọn
             document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
             this.classList.add('selected');
-
-            // Kích hoạt nút "MUA NGAY"
-            addToCartButton.disabled = false;
 
             // Cập nhật hình ảnh
             if (mainImage && imageUrl) {
@@ -455,7 +457,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 action: 'add',
                 productId,
                 colorId: selectedColorId,
-                quantity
+                quantity,
+                sessionId: '<?php echo $_SESSION['guest_session_id']; ?>'
             });
 
             fetch('/Fanimation/pages/cart/add_to_cart.php', {
@@ -463,7 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `action=add&product_id=${productId}&color_id=${selectedColorId}&quantity=${quantity}`
+                body: `action=add&product_id=${productId}&color_id=${selectedColorId}&quantity=${quantity}&session_id=<?php echo $_SESSION['guest_session_id']; ?>`
             })
             .then(response => {
                 console.log('Response status:', response.status, 'URL:', response.url);
