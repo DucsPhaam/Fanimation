@@ -9,13 +9,13 @@ header('Content-Type: application/json');
 error_log("Starting add_to_cart.php - " . date('Y-m-d H:i:s'));
 error_log("Received POST data: " . print_r($_POST, true));
 
-if (!isset($_SESSION['user_id'])) {
-    error_log("User not logged in");
-    echo json_encode(['status' => 'error', 'message' => 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!']);
-    exit;
+// Generate or retrieve session_id for guests
+if (!isset($_SESSION['session_id'])) {
+    $_SESSION['session_id'] = session_id();
 }
+$session_id = $_SESSION['session_id'];
+$user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : null;
 
-$user_id = intval($_SESSION['user_id']);
 $action = isset($_POST['action']) ? $_POST['action'] : 'add';
 
 if ($action === 'add') {
@@ -23,7 +23,7 @@ if ($action === 'add') {
     $color_id = isset($_POST['color_id']) ? intval($_POST['color_id']) : 0;
     $quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1;
 
-    error_log("Add product: user_id=$user_id, product_id=$product_id, color_id=$color_id, quantity=$quantity");
+    error_log("Add product: user_id=" . ($user_id ?? 'guest') . ", session_id=$session_id, product_id=$product_id, color_id=$color_id, quantity=$quantity");
 
     if ($product_id <= 0 || $color_id <= 0 || $quantity < 1) {
         error_log("Invalid product data: product_id=$product_id, color_id=$color_id, quantity=$quantity");
@@ -37,7 +37,7 @@ if ($action === 'add') {
         exit;
     }
 
-    // Lấy product_variant_id
+    // Get product_variant_id
     $variant_query = "SELECT id, stock FROM product_variants WHERE product_id = ? AND color_id = ?";
     $variant_stmt = $conn->prepare($variant_query);
     if (!$variant_stmt) {
@@ -65,10 +65,10 @@ if ($action === 'add') {
         exit;
     }
 
-    // Thêm sản phẩm vào giỏ hàng
+    // Add product to cart
     $insert_query = "
-        INSERT INTO carts (user_id, product_variant_id, quantity) 
-        VALUES (?, ?, ?) 
+        INSERT INTO carts (user_id, session_id, product_variant_id, quantity) 
+        VALUES (?, ?, ?, ?) 
         ON DUPLICATE KEY UPDATE quantity = quantity + ?
     ";
     $stmt = $conn->prepare($insert_query);
@@ -77,9 +77,9 @@ if ($action === 'add') {
         echo json_encode(['status' => 'error', 'message' => 'Lỗi chuẩn bị truy vấn: ' . $conn->error]);
         exit;
     }
-    $stmt->bind_param('iiii', $user_id, $product_variant_id, $quantity, $quantity);
+    $stmt->bind_param('isiii', $user_id, $session_id, $product_variant_id, $quantity, $quantity);
     if ($stmt->execute()) {
-        error_log("Insert successful: user_id=$user_id, product_variant_id=$product_variant_id");
+        error_log("Insert successful: user_id=" . ($user_id ?? 'guest') . ", session_id=$session_id, product_variant_id=$product_variant_id");
         echo json_encode(['status' => 'success', 'message' => 'Đã thêm vào giỏ hàng!']);
     } else {
         error_log("Insert failed: " . $stmt->error);
@@ -97,16 +97,16 @@ if ($action === 'add') {
         exit;
     }
 
-    // Kiểm tra tồn kho trước khi tăng số lượng
+    // Check stock before increasing quantity
     if ($action === 'increase') {
         $stock_query = "
             SELECT pv.stock, c.quantity 
             FROM carts c 
             JOIN product_variants pv ON c.product_variant_id = pv.id 
-            WHERE c.id = ? AND c.user_id = ?
+            WHERE c.id = ? AND (c.user_id = ? OR c.session_id = ?)
         ";
         $stock_stmt = $conn->prepare($stock_query);
-        $stock_stmt->bind_param('ii', $cart_id, $user_id);
+        $stock_stmt->bind_param('iis', $cart_id, $user_id, $session_id);
         $stock_stmt->execute();
         $stock_result = $stock_stmt->get_result()->fetch_assoc();
         $stock_stmt->close();
@@ -126,14 +126,14 @@ if ($action === 'add') {
         }
     }
 
-    $select_query = "SELECT quantity FROM carts WHERE id = ? AND user_id = ?";
+    $select_query = "SELECT quantity FROM carts WHERE id = ? AND (user_id = ? OR session_id = ?)";
     $stmt = $conn->prepare($select_query);
     if (!$stmt) {
         error_log("Prepare failed: " . $conn->error);
         echo json_encode(['status' => 'error', 'message' => 'Lỗi chuẩn bị truy vấn: ' . $conn->error]);
         exit;
     }
-    $stmt->bind_param('ii', $cart_id, $user_id);
+    $stmt->bind_param('iis', $cart_id, $user_id, $session_id);
     $stmt->execute();
     $result = $stmt->get_result()->fetch_assoc();
 
@@ -146,14 +146,14 @@ if ($action === 'add') {
     $new_quantity = $current_quantity + $delta;
 
     if ($new_quantity <= 0) {
-        $delete_query = "DELETE FROM carts WHERE id = ? AND user_id = ?";
+        $delete_query = "DELETE FROM carts WHERE id = ? AND (user_id = ? OR session_id = ?)";
         $stmt = $conn->prepare($delete_query);
         if (!$stmt) {
             error_log("Prepare failed: " . $conn->error);
             echo json_encode(['status' => 'error', 'message' => 'Lỗi chuẩn bị truy vấn: ' . $conn->error]);
             exit;
         }
-        $stmt->bind_param('ii', $cart_id, $user_id);
+        $stmt->bind_param('iis', $cart_id, $user_id, $session_id);
         if ($stmt->execute()) {
             echo json_encode(['status' => 'success', 'message' => 'Đã xóa sản phẩm khỏi giỏ hàng!']);
         } else {
@@ -161,14 +161,14 @@ if ($action === 'add') {
             echo json_encode(['status' => 'error', 'message' => 'Lỗi khi xóa sản phẩm: ' . $stmt->error]);
         }
     } else {
-        $update_query = "UPDATE carts SET quantity = ? WHERE id = ? AND user_id = ?";
+        $update_query = "UPDATE carts SET quantity = ? WHERE id = ? AND (user_id = ? OR session_id = ?)";
         $stmt = $conn->prepare($update_query);
         if (!$stmt) {
             error_log("Prepare failed: " . $conn->error);
             echo json_encode(['status' => 'error', 'message' => 'Lỗi chuẩn bị truy vấn: ' . $conn->error]);
             exit;
         }
-        $stmt->bind_param('iii', $new_quantity, $cart_id, $user_id);
+        $stmt->bind_param('iiis', $new_quantity, $cart_id, $user_id, $session_id);
         if ($stmt->execute()) {
             echo json_encode(['status' => 'success', 'message' => 'Đã cập nhật số lượng!']);
         } else {
@@ -187,14 +187,14 @@ if ($action === 'add') {
         exit;
     }
 
-    $delete_query = "DELETE FROM carts WHERE id = ? AND user_id = ?";
+    $delete_query = "DELETE FROM carts WHERE id = ? AND (user_id = ? OR session_id = ?)";
     $stmt = $conn->prepare($delete_query);
     if (!$stmt) {
         error_log("Prepare failed: " . $conn->error);
         echo json_encode(['status' => 'error', 'message' => 'Lỗi chuẩn bị truy vấn: ' . $conn->error]);
         exit;
     }
-    $stmt->bind_param('ii', $cart_id, $user_id);
+    $stmt->bind_param('iis', $cart_id, $user_id, $session_id);
     if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Đã xóa sản phẩm khỏi giỏ hàng!']);
     } else {
