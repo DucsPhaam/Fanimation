@@ -134,7 +134,7 @@ $(document).ready(function() {
         $('#detailOrderId').text(orderId);
         
         $.ajax({
-            url: '/Fanimation/pages/cart/get_order_details.php',
+            url: '/Fanimation/pages/cart/get_order_detail.php',
             type: 'GET',
             data: { order_id: orderId },
             dataType: 'json',
@@ -187,7 +187,7 @@ $(document).ready(function() {
         }
 
         $.ajax({
-            url: '/Fanimation/pages/cart/load_more_orders.php',
+            url: '/Fanimation/pages/cart/load_more_order.php',
             type: 'GET',
             data: {
                 identifier: '<?php echo $identifier; ?>',
