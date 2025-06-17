@@ -161,14 +161,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 if (!$is_buy_now && !empty($checkout_items)) {
                     $ids = implode(',', array_map('intval', $checkout_items));
+                    $condition = $user_id ? "user_id = ?" : "session_id = ?";
+                    $param = $user_id ?: $session_id;
+                    $type = $user_id ? 'i' : 's';
+                    
                     $query = "DELETE FROM Carts WHERE $condition AND id IN ($ids)";
                     $stmt = $conn->prepare($query);
                     if ($stmt === false) {
-                        echo "<pre>Debug Error - Prepare failed: " . $conn->error . " (Query: $query)</pre>";
+                        echo "<pre>Debug Error - Prepare failed: " . htmlspecialchars($conn->error) . " (Query: $query)</pre>";
                         error_log("Prepare failed: " . $conn->error . " (Query: $query)");
                     } else {
                         $stmt->bind_param($type, $param);
-                        $stmt->execute();
+                        if (!$stmt->execute()) {
+                            echo "<pre>Debug Error - Execute failed: " . htmlspecialchars($stmt->error) . " (Query: $query)</pre>";
+                            error_log("Execute failed: " . $stmt->error . " (Query: $query)");
+                        }
                         $stmt->close();
                     }
                 }
