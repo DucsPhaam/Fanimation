@@ -97,9 +97,12 @@ $search = isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '';
             </div>
             <?php } ?>
             <!-- container-fluid.// -->
-            <div class="nav-search">
-                <form method="GET" action="search_result.php" class="d-flex align-content-center mb-1">
-                    <input class="form-control form-control-sm w-24 me-1 align-items-center mt-2" name="search" type="text" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search for products" aria-label="Tìm kiếm">
+           <div class="nav-search">
+                <form method="GET" action="<?php echo $search_result_url; ?>" class="d-flex align-items-center mb-1">
+                    <input class="form-control form-control-sm w-24 me-1 mt-2" name="search" type="text" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search for products" aria-label="Tìm kiếm">
+                    <button type="submit" class="btn btn-outline-secondary bg-white btn-sm mt-2">
+                        <i class="bi bi-search"></i>
+                    </button>
                 </form>
             </div>
             <!-- giỏ hàng -->
