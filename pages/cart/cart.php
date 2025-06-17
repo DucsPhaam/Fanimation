@@ -3,22 +3,21 @@ include $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/includes/config.php';
 require_once $db_connect_url;
 include $header_url;
 
-// Kiểm tra đăng nhập
-$user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 0;
-if ($user_id === 0) {
-    echo "<div class='alert alert-danger'>Vui lòng đăng nhập để xem giỏ hàng!</div>";
-    include $footer_url;
-    exit;
+// Generate or retrieve session_id for guests
+if (!isset($_SESSION['session_id'])) {
+    $_SESSION['session_id'] = session_id();
 }
+$session_id = $_SESSION['session_id'];
+$user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : null;
 
-error_log("Fetching cart for user_id: $user_id");
+error_log("Fetching cart for user_id: " . ($user_id ?? 'guest') . ", session_id: $session_id");
 $cart_query = "
     SELECT c.id, c.product_variant_id, c.quantity, pv.product_id, pv.color_id, p.name, p.price, co.hex_code
     FROM carts c
     JOIN product_variants pv ON c.product_variant_id = pv.id
     JOIN products p ON pv.product_id = p.id
     LEFT JOIN colors co ON pv.color_id = co.id
-    WHERE c.user_id = ?
+    WHERE c.user_id = ? OR c.session_id = ?
 ";
 $stmt = $conn->prepare($cart_query);
 if (!$stmt) {
@@ -27,7 +26,7 @@ if (!$stmt) {
     include $footer_url;
     exit;
 }
-$stmt->bind_param('i', $user_id);
+$stmt->bind_param('is', $user_id, $session_id);
 if (!$stmt->execute()) {
     error_log("Execute cart query failed: " . $stmt->error);
     echo "<div class='alert alert-danger'>Lỗi thực thi truy vấn: " . htmlspecialchars($stmt->error) . "</div>";
@@ -46,7 +45,7 @@ while ($row = $cart_result->fetch_assoc()) {
         'product_variant_id' => $row['product_variant_id'],
         'product_id' => $row['product_id'],
         'color' => $row['hex_code'] ?? '#000000',
-        'size' => 'N/A', // Bỏ size_id vì bảng carts không hỗ trợ
+        'size' => 'N/A', // Size is not supported in the carts table
         'quantity' => $row['quantity'],
         'name' => $row['name'],
         'price' => $row['price']
@@ -121,6 +120,11 @@ function getColorHex($color_id) {
             </tbody>
         </table>
         <a href="checkout.php?items=<?php echo htmlspecialchars(implode(',', array_column($_SESSION['cart'], 'cart_id'))); ?>" class="btn btn-success">Thanh toán</a>
+        <?php if ($user_id === null): ?>
+            <p class="text-center mt-3">
+                <a href="login.php?redirect=cart.php">Đăng nhập</a> hoặc <a href="register.php">Đăng ký</a> để lưu giỏ hàng và theo dõi đơn hàng dễ dàng hơn!
+            </p>
+        <?php endif; ?>
     <?php endif; ?>
 </div>
 
@@ -182,13 +186,13 @@ $(document).ready(function() {
                     var price = parseFloat($('tr[data-cart-id="' + cart_id + '"]').data('price'));
                     var subtotalElement = $('#subtotal-' + cart_id);
                     var newSubtotal = price * newQty;
-                    subtotalElement.text(newSubtotal.toLocaleString('vi-VN') + ' VND');
+                    subtotalElement.text(newSubtotal.toLocaleString('vi-VN') + ' $');
 
                     var totalElement = $('#total');
                     var currentTotal = parseFloat(totalElement.text().replace(/[^0-9.-]+/g, ""));
                     var delta = action === 'increase' ? price : -price;
                     var newTotal = currentTotal + delta;
-                    totalElement.text(newTotal.toLocaleString('vi-VN') + ' VND');
+                    totalElement.text(newTotal.toLocaleString('vi-VN') + ' $');
                 } else {
                     Swal.fire({
                         title: 'Lỗi',
@@ -230,7 +234,7 @@ $(document).ready(function() {
                     var totalElement = $('#total');
                     var currentTotal = parseFloat(totalElement.text().replace(/[^0-9.-]+/g, ""));
                     var newTotal = currentTotal - (price * qty);
-                    totalElement.text(newTotal.toLocaleString('vi-VN') + ' VND');
+                    totalElement.text(newTotal.toLocaleString('vi-VN') + ' $');
 
                     if ($('tbody tr').length === 1) {
                         $('.container.mt-4').html('<p class="text-center">Giỏ hàng của bạn đang trống.</p>');
