@@ -6,6 +6,7 @@ $header_url = $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/includes/header.php';
 $footer_url = $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/includes/footer.php';
 $admin_header_url = $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/includes/admin/header.php';
 $admin_sidebar_url = $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/includes/admin/sidebar.php';
+$search_result_url = $base_url . '/includes/search_result.php';
 $logo_url = $base_url . '/assets/images/fan.svg';
 $index_url = $base_url . '/pages/index.php';
 $help_center_url = $base_url . '/pages/help_center.php';
