@@ -22,4 +22,5 @@ $admin_index_url = $base_url . '/pages/admin/index.php';
 $cart_url = $base_url . '/pages/cart/cart.php';
 $add_to_cart_url = $base_url . '/pages/cart/add_to_cart.php';
 $my_order_url = $base_url . '/pages/cart/my_order.php';
+
 ?>
