@@ -2,10 +2,63 @@
 include $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/includes/config.php';
 require_once $db_connect_url;
 include $header_url;
+
+// Lấy thông tin người dùng nếu đã đăng nhập
+$user_data = [];
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+    $user_query = "SELECT name, email, phone, address FROM users WHERE id = ?";
+    $stmt = mysqli_prepare($conn, $user_query);
+    mysqli_stmt_bind_param($stmt, "i", $user_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $user_data = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+}
 ?>
 <style>
     .icon {
         color: rgb(133, 55, 167);
+    }
+    .required::after {
+        content: " *";
+        color: #a94442;
+    }
+    .drag-area {
+        border: 2px dashed #ccc;
+        height: auto;
+        width: 100%;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 20px;
+        background-color: #f9f9f9;
+        color: #666;
+        position: relative;
+        overflow: hidden;
+    }
+    .drag-area.active {
+        border: 2px solid #007bff;
+        background-color: #e9f0f8;
+    }
+    .drag-area .preview img {
+        max-width: 100px;
+        margin: 5px;
+    }
+    .bttsubmit {
+        background-color: #922492;
+        border: none;
+        padding: 0.7rem;
+        width: 6rem;
+        border-radius: 3px;
+        font-weight: bold;
+        color: #fff;
+        cursor: pointer;
+    }
+    .bttsubmit:hover {
+        background-color: #520a52;
     }
 </style>
 
@@ -27,7 +80,6 @@ include $header_url;
 
     <div class="container my-5 mx-auto w-75">
         <div class="row g-4">
-            <!-- Location Section -->
             <div class="col-md-4 text-start">
                 <i class="icon bi bi-geo-alt fs-2 mb-2"></i>
                 <div class="text-start">
@@ -38,8 +90,6 @@ include $header_url;
                     <p>Fax: 866.482.5215</p>
                 </div>
             </div>
-
-            <!-- Product Support Section -->
             <div class="col-md-4 text-start">
                 <i class="icon bi bi-card-list fs-2 mb-2"></i>
                 <div class="text-start">
@@ -48,8 +98,6 @@ include $header_url;
                     <p class="fw-bold">Get product support</p>
                 </div>
             </div>
-
-            <!-- Marketing Section -->
             <div class="col-md-4 text-start">
                 <i class="icon bi bi-file-earmark-text fs-2 mb-2"></i>
                 <div class="text-start">
@@ -58,8 +106,6 @@ include $header_url;
                     <p class="fw-bold">press@fanimation.com</p>
                 </div>
             </div>
-
-            <!-- Suggestions Section -->
             <div class="col-md-4 text-start">
                 <i class="icon bi bi-chat-dots fs-2 mb-2"></i>
                 <div class="text-start">
@@ -68,8 +114,6 @@ include $header_url;
                     <p class="fw-bold">suggestions@fanimation.com</p>
                 </div>
             </div>
-
-            <!-- Find a Sales Agent Section -->
             <div class="col-md-4 text-start">
                 <i class="icon bi bi-send-fill fs-2 mb-2"></i>
                 <div class="text-start">
@@ -78,8 +122,6 @@ include $header_url;
                     <p class="fw-bold">Find your agent</p>
                 </div>
             </div>
-
-            <!-- Careers Section -->
             <div class="col-md-4 text-start">
                 <i class="icon bi bi-person-circle fs-2 mb-2"></i>
                 <div class="text-start">
@@ -100,45 +142,36 @@ include $header_url;
     </div>
 </div>
 
-<style src="../assets/css/help_center.php"></style>
-
 <div id="contact-tech" class="bg-light">
     <div class="justify-items-center mx-auto w-75 mt-3">
         <p class="fs-2 fw-semibold text-center">Questions? Contact tech support</p>
     </div>
     <div class="container">
-        <form id="supportForm">
+        <form id="supportForm" enctype="multipart/form-data">
             <div class="row mb-3">
                 <div class="col">
                     <label class="required">Name</label>
-                    <div class="row">
-                        <div class="col">
-                            <input type="text" class="form-control" name="first_name" placeholder="First" required>
-                        </div>
-                        <div class="col">
-                            <input type="text" class="form-control" name="last_name" placeholder="Last" required>
-                        </div>
-                    </div>
+                    <input type="text" class="form-control" name="name" value="<?php echo isset($user_data['name']) ? htmlspecialchars($user_data['name']) : ''; ?>" required>
                 </div>
                 <div class="col">
                     <label class="required">Phone number</label>
-                    <input type="tel" class="form-control" name="phone" required>
+                    <input type="tel" class="form-control" name="phone" value="<?php echo isset($user_data['phone']) ? htmlspecialchars($user_data['phone']) : ''; ?>" required>
                 </div>
                 <div class="col">
                     <label class="required">Email address</label>
-                    <input type="email" class="form-control" name="email" required>
+                    <input type="email" class="form-control" name="email" value="<?php echo isset($user_data['email']) ? htmlspecialchars($user_data['email']) : ''; ?>" required>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col">
                     <label class="required">Address</label>
-                    <input type="text" class="form-control" name="address" placeholder="Street address" required>
+                    <input type="text" class="form-control" name="address" placeholder="Street address" value="<?php echo isset($user_data['address']) ? htmlspecialchars($user_data['address']) : ''; ?>" required>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col">
-                    <label class="required">Product name</label>
-                    <input type="text" class="form-control" name="product_name" required>
+                    <label>Product name</label>
+                    <input type="text" class="form-control" name="product_name">
                 </div>
             </div>
             <div class="row mb-3">
