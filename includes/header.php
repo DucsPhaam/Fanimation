@@ -1,13 +1,13 @@
 <?php
-include $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/includes/config.php';
 session_start();
+include $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/includes/config.php';
+
 require_once $db_connect_url;
 include $function_url;
 $search = isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,7 +22,6 @@ $search = isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '';
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/assets/fonts/font.php'; ?>
 </head>
-
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark ">
         <div class="container-fluid">
