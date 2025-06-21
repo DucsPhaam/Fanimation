@@ -3,7 +3,6 @@ include $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/includes/config.php';
 require_once $db_connect_url;
 include $header_url;
 ?>
-
 <style>
     .icon {
         color: rgb(133, 55, 167);
@@ -16,7 +15,7 @@ include $header_url;
             <div class="carousel-item active">
                 <img src="../assets/images/banners/contact_us.jpg" alt="Contact Us Image" class="d-block w-100">
                 <div class="carousel-content">
-                    <h1 class="">Contact</h1>
+                    <h1>Contact</h1>
                 </div>
             </div>
         </div>
@@ -108,63 +107,66 @@ include $header_url;
         <p class="fs-2 fw-semibold text-center">Questions? Contact tech support</p>
     </div>
     <div class="container">
-        <div class="row mb-3">
-            <div class="col">
-                <label class="required">Name</label>
-                <div class="row">
-                    <div class="col">
-                        <input type="text" class="form-control" placeholder="First">
-                    </div>
-                    <div class="col">
-                        <input type="text" class="form-control" placeholder="Last">
+        <form id="supportForm">
+            <div class="row mb-3">
+                <div class="col">
+                    <label class="required">Name</label>
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" class="form-control" name="first_name" placeholder="First" required>
+                        </div>
+                        <div class="col">
+                            <input type="text" class="form-control" name="last_name" placeholder="Last" required>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col">
-                <label class="required">Phone number</label>
-                <input type="tel" class="form-control">
-            </div>
-            <div class="col">
-                <label class="required">Email address</label>
-                <input type="email" class="form-control">
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col">
-                <label class="required">Address</label>
-                <input type="text" class="form-control" placeholder="Street address">
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col">
-                <label class="required">Product name</label>
-                <input type="text" class="form-control">
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col">
-                <label class="required">Upload photo/video of fan</label>
-                <div class="drag-area">
-                    <span>Drop files here or</span>
-                    <button class="btn btn-primary">Select files</button>
-                    <input type="file" class="form-control-file" accept="image/jpeg,image/gif,image/png,application/pdf,video/mp4,video/heic,video/hevc" multiple style="display: none;">
+                <div class="col">
+                    <label class="required">Phone number</label>
+                    <input type="tel" class="form-control" name="phone" required>
                 </div>
-                <small class="text-muted">Accepted file types: jpg, gif, png, pdf, mp4, heif, hevc, Max. file size: 39 MB, Max. files: 4.</small>
+                <div class="col">
+                    <label class="required">Email address</label>
+                    <input type="email" class="form-control" name="email" required>
+                </div>
             </div>
-        </div>
-
-        <div class="row mb-3 problem-description">
-            <div class="col">
-                <label class="required">Description of problem</label>
-                <textarea class="form-control" maxlength="280" placeholder="Accident! Full description of problem"></textarea>
-                <small class="char-count">0 of 280 max characters</small>
+            <div class="row mb-3">
+                <div class="col">
+                    <label class="required">Address</label>
+                    <input type="text" class="form-control" name="address" placeholder="Street address" required>
+                </div>
             </div>
-        </div>
-        <button type="submit" class="bttsubmit">Submit</button>
+            <div class="row mb-3">
+                <div class="col">
+                    <label class="required">Product name</label>
+                    <input type="text" class="form-control" name="product_name" required>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <label class="required">Upload photo/video of fan</label>
+                    <div class="drag-area">
+                        <span>Drop files here or</span>
+                        <button type="button" class="btn btn-primary">Select files</button>
+                        <input type="file" class="form-control-file" name="files[]" accept="image/jpeg,image/gif,image/png,application/pdf,video/mp4,video/heic,video/hevc" multiple style="display: none;">
+                    </div>
+                    <small class="text-muted">Accepted file types: jpg, gif, png, pdf, mp4, heif, hevc, Max. file size: 39 MB, Max. files: 4.</small>
+                </div>
+            </div>
+            <div class="row mb-3 problem-description">
+                <div class="col">
+                    <label class="required">Description of problem</label>
+                    <textarea class="form-control" name="description" maxlength="280" placeholder="Accident! Full description of problem" required></textarea>
+                    <small class="char-count">0 of 280 max characters</small>
+                </div>
+            </div>
+            <button type="submit" class="bttsubmit btn btn-primary">Submit</button>
+        </form>
     </div>
 </div>
 
-<script src="../assets/js/help_center.js"></script>
+<!-- Thêm SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/Fanimation/assets/js/help_center.js"></script>
 <?php
 mysqli_close($conn);
 include $footer_url;
