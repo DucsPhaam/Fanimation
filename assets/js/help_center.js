@@ -12,9 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
     phoneError.style.display = "none";
     phoneInput.parentElement.appendChild(phoneError);
     phoneInput.addEventListener("input", function() {
-        const phonePattern = /^[0-9]{10,11}$/;
+        const phonePattern = /^(0[35789][0-9]{8,9})$/;
         if (!phonePattern.test(phoneInput.value)) {
-            phoneError.textContent = "Số điện thoại phải từ 10-11 chữ số.";
+            phoneError.textContent = "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam (10 hoặc 11 chữ số, bắt đầu bằng 03, 05, 07, 08, hoặc 09).";
             phoneError.style.display = "block";
         } else {
             phoneError.style.display = "none";
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     emailError.style.display = "none";
     emailInput.parentElement.appendChild(emailError);
     emailInput.addEventListener("input", function() {
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (!emailPattern.test(emailInput.value)) {
             emailError.textContent = "Email không hợp lệ.";
             emailError.style.display = "block";
@@ -70,9 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showFiles() {
         const validExtensions = ["image/jpeg", "image/gif", "image/png", "application/pdf", "video/mp4", "video/heic", "video/hevc"];
-        dropArea.innerHTML = "";
+        const maxSize = 39 * 1024 * 1024; // 39MB
+        dropArea.innerHTML = '<span>Drop files here or</span><button type="button" class="btn btn-primary">Select files</button><input type="file" class="form-control-file" name="files[]" accept="image/jpeg,image/gif,image/png,application/pdf,video/mp4,video/heic,video/hevc" multiple style="display: none;">';
         files.forEach(file => {
-            if (validExtensions.includes(file.type) && file.size <= 39 * 1024 * 1024) {
+            if (validExtensions.includes(file.type) && file.size <= maxSize) {
                 let fileReader = new FileReader();
                 fileReader.onload = () => {
                     let fileURL = fileReader.result;
@@ -106,15 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         // Kiểm tra các trường bắt buộc
-        const firstName = form.querySelector("input[name='first_name']").value.trim();
-        const lastName = form.querySelector("input[name='last_name']").value.trim();
+        const name = form.querySelector("input[name='name']").value.trim();
         const phone = phoneInput.value.trim();
         const email = emailInput.value.trim();
         const address = form.querySelector("input[name='address']").value.trim();
         const productName = form.querySelector("input[name='product_name']").value.trim();
         const description = textarea.value.trim();
+        const phonePattern = /^(0[35789][0-9]{8,9})$/;
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-        if (!firstName || !lastName || !phone || !email || !address || !productName || !description) {
+        if (!name || !phone || !email || !address || !description) {
             Swal.fire({
                 icon: 'error',
                 title: 'Lỗi!',
@@ -124,9 +126,28 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (!phonePattern.test(phone)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: 'Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam (10 hoặc 11 chữ số, bắt đầu bằng 03, 05, 07, 08, hoặc 09).',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        if (!emailPattern.test(email)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: 'Email không hợp lệ. Vui lòng nhập đúng định dạng email (ví dụ: example@domain.com).',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
         const formData = new FormData();
-        formData.append('first_name', firstName);
-        formData.append('last_name', lastName);
+        formData.append('name', name);
         formData.append('phone', phone);
         formData.append('email', email);
         formData.append('address', address);
@@ -140,10 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/Fanimation/pages/submit_support.php', {
                 method: 'POST',
                 body: formData,
-                credentials: 'same-origin' // Gửi cookie
+                credentials: 'same-origin'
             });
             const text = await response.text();
-            console.log('Phản hồi từ server:', text); // Debug
+            console.log('Phản hồi từ server:', text);
             const result = JSON.parse(text);
 
             if (result.success) {
@@ -154,8 +175,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     confirmButtonText: 'OK'
                 }).then(() => {
                     form.reset();
-                    dropArea.innerHTML = '<span>Drop files here or</span><button class="btn btn-primary">Select files</button><input type="file" class="form-control-file" name="files[]" accept="image/jpeg,image/gif,image/png,application/pdf,video/mp4,video/heic,video/hevc" multiple style="display: none;">';
+                    dropArea.innerHTML = '<span>Drop files here or</span><button type="button" class="btn btn-primary">Select files</button><input type="file" class="form-control-file" name="files[]" accept="image/jpeg,image/gif,image/png,application/pdf,video/mp4,video/heic,video/hevc" multiple style="display: none;">';
                     files = [];
+                    window.location.href = '/Fanimation/pages/index.php';
                 });
             } else {
                 Swal.fire({
