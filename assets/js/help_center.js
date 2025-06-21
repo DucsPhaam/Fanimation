@@ -1,33 +1,12 @@
-    const cities = ["Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Cần Thơ", "Huế", "Nha Trang"];
-    const searchInput = document.getElementById("searchInput");
-    const suggestions = document.getElementById("suggestions");
-
-    function showSuggestions() {
-        suggestions.innerHTML = "";
-        const value = searchInput.value.toLowerCase();
-        const filteredCities = value ? cities.filter(city => city.toLowerCase().includes(value)) : cities;
-        filteredCities.forEach(city => {
-            const div = document.createElement("div");
-            div.textContent = city;
-            div.addEventListener("click", function() {
-                searchInput.value = city;
-                suggestions.style.display = "none";
-            });
-            suggestions.appendChild(div);
-        });
-        suggestions.style.display = "block";
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('#supportForm');
+    if (!form) {
+        console.error("Support form not found");
+        return;
     }
 
-    searchInput.addEventListener("input", showSuggestions);
-
-    document.addEventListener("click", function(e) {
-        if (!searchInput.contains(e.target)) {
-            suggestions.style.display = "none";
-        }
-    });
-
-    // check định dạng sđt
-    const phoneInput = document.querySelector("input[type='tel']");
+    // Check phone number format
+    const phoneInput = form.querySelector("input[name='phone']");
     const phoneError = document.createElement("div");
     phoneError.style.color = "red";
     phoneError.style.display = "none";
@@ -42,8 +21,8 @@
         }
     });
 
-    // check định dạng email
-    const emailInput = document.querySelector("input[type='email']");
+    // Check email format
+    const emailInput = form.querySelector("input[name='email']");
     const emailError = document.createElement("div");
     emailError.style.color = "red";
     emailError.style.display = "none";
@@ -58,19 +37,19 @@
         }
     });
 
-    // upload file or images
-    const dropArea = document.querySelector(".drag-area");
-    const input = dropArea.querySelector("input");
-    let file;
+    // File upload handling
+    const dropArea = form.querySelector(".drag-area");
+    const fileInput = dropArea.querySelector("input[name='files[]']");
+    const selectButton = dropArea.querySelector("button");
+    let files = [];
 
-    dropArea.querySelector("button").onclick = () => {
-        input.click();
-    };
+    selectButton.addEventListener("click", () => {
+        fileInput.click();
+    });
 
-    input.addEventListener("change", function() {
-        file = this.files[0];
-        dropArea.classList.add("active");
-        showFile();
+    fileInput.addEventListener("change", function() {
+        files = Array.from(this.files).slice(0, 4); // Giới hạn 4 file
+        showFiles();
     });
 
     dropArea.addEventListener("dragover", (event) => {
@@ -84,34 +63,116 @@
 
     dropArea.addEventListener("drop", (event) => {
         event.preventDefault();
-        file = event.dataTransfer.files[0];
-        dropArea.classList.add("active");
-        showFile();
+        files = Array.from(event.dataTransfer.files).slice(0, 4); // Giới hạn 4 file
+        fileInput.files = event.dataTransfer.files;
+        showFiles();
     });
 
-    function showFile() {
-        let fileType = file.type;
-        let validExtensions = ["image/jpeg", "image/gif", "image/png", "application/pdf", "video/mp4", "video/heic", "video/hevc"];
-        if (validExtensions.includes(fileType)) {
-            let fileReader = new FileReader();
-            fileReader.onload = () => {
-                let fileURL = fileReader.result;
-                let imgTag = `<img src="${fileURL}" alt="uploaded file">`;
-                dropArea.innerHTML = imgTag;
-            };
-            fileReader.readAsDataURL(file);
-        } else {
-            alert("This file type is not supported!");
-            dropArea.classList.remove("active");
-        }
+    function showFiles() {
+        const validExtensions = ["image/jpeg", "image/gif", "image/png", "application/pdf", "video/mp4", "video/heic", "video/hevc"];
+        dropArea.innerHTML = "";
+        files.forEach(file => {
+            if (validExtensions.includes(file.type) && file.size <= 39 * 1024 * 1024) {
+                let fileReader = new FileReader();
+                fileReader.onload = () => {
+                    let fileURL = fileReader.result;
+                    let imgTag = `<img src="${fileURL}" alt="${file.name}" style="max-width: 100px; margin: 5px;">`;
+                    dropArea.insertAdjacentHTML('beforeend', imgTag);
+                };
+                fileReader.readAsDataURL(file);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: `File ${file.name} không được hỗ trợ hoặc vượt quá 39MB!`,
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+        dropArea.classList.add("active");
     }
 
-    // giới hạn ký tự ở decription
-
-    const textarea = document.querySelector(".problem-description textarea");
-    const charCount = document.querySelector(".problem-description .char-count");
+    // Character count for description
+    const textarea = form.querySelector("textarea[name='description']");
+    const charCount = form.querySelector(".char-count");
     textarea.addEventListener("input", function() {
         const maxLength = this.maxLength;
         const currentLength = this.value.length;
         charCount.textContent = `${currentLength} of ${maxLength} max characters`;
     });
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Kiểm tra các trường bắt buộc
+        const firstName = form.querySelector("input[name='first_name']").value.trim();
+        const lastName = form.querySelector("input[name='last_name']").value.trim();
+        const phone = phoneInput.value.trim();
+        const email = emailInput.value.trim();
+        const address = form.querySelector("input[name='address']").value.trim();
+        const productName = form.querySelector("input[name='product_name']").value.trim();
+        const description = textarea.value.trim();
+
+        if (!firstName || !lastName || !phone || !email || !address || !productName || !description) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: 'Vui lòng điền đầy đủ các trường bắt buộc!',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('first_name', firstName);
+        formData.append('last_name', lastName);
+        formData.append('phone', phone);
+        formData.append('email', email);
+        formData.append('address', address);
+        formData.append('product_name', productName);
+        formData.append('description', description);
+        files.forEach((file, index) => {
+            formData.append(`files[${index}]`, file);
+        });
+
+        try {
+            const response = await fetch('/Fanimation/pages/submit_support.php', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin' // Gửi cookie
+            });
+            const text = await response.text();
+            console.log('Phản hồi từ server:', text); // Debug
+            const result = JSON.parse(text);
+
+            if (result.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: result.message,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    form.reset();
+                    dropArea.innerHTML = '<span>Drop files here or</span><button class="btn btn-primary">Select files</button><input type="file" class="form-control-file" name="files[]" accept="image/jpeg,image/gif,image/png,application/pdf,video/mp4,video/heic,video/hevc" multiple style="display: none;">';
+                    files = [];
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: result.message,
+                    confirmButtonText: 'OK'
+                });
+            }
+        } catch (error) {
+            console.error('Lỗi:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: 'Đã có lỗi xảy ra: ' + error.message,
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+});
