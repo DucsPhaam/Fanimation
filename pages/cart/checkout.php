@@ -59,7 +59,6 @@ if ($is_buy_now) {
             $product['color_id'] = $color_id;
             $cart_items[] = $product;
             $total = $product['price'] * $quantity;
-        } else {
         }
         $stmt->close();
     }
@@ -120,10 +119,11 @@ if ($is_buy_now) {
     }
 }
 
+$errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
+    // Kiểm tra CSRF token
     if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-        $error = "Lỗi bảo mật: CSRF token không hợp lệ!";
+        $errors[] = "Lỗi bảo mật: CSRF token không hợp lệ!";
         echo "<pre>Debug Error - CSRF Validation Failed: Form Token: " . ($_POST['csrf_token'] ?? 'Not set') . ", Session Token: " . ($_SESSION['csrf_token'] ?? 'Not set') . "</pre>";
         error_log("CSRF Validation Failed: Form Token: " . ($_POST['csrf_token'] ?? 'Not set') . ", Session Token: " . ($_SESSION['csrf_token'] ?? 'Not set'));
     } else {
@@ -133,63 +133,114 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $address = mysqli_real_escape_string($conn, $_POST['address']);
         $note = mysqli_real_escape_string($conn, $_POST['note']);
 
-        $query = "INSERT INTO orders (user_id, session_id, fullname, email, phone_number, address, note, total_money, status, payment_status) 
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'pending')";
-        $stmt = $conn->prepare($query);
-        if ($stmt === false) {
-            $error = "Lỗi prepare: " . $conn->error;
-        } else {
-            $stmt->bind_param('isssssss', $user_id, $session_id, $fullname, $email, $phone, $address, $note, $total); // Sửa 'i' thành 's' cho session_id
-            if ($stmt->execute()) {
+        // Kiểm tra email
+        $email_pattern = '/^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]+\.)*(gmail\.com|yahoo\.com|hotmail\.com|outlook\.com|aol\.com|example\.com)$/';
+        if (!preg_match($email_pattern, $email)) {
+            $errors[] = "Email không hợp lệ! Chỉ chấp nhận các domain: gmail.com, yahoo.com, hotmail.com, outlook.com, aol.com, example.com.";
+        }
+
+        // Kiểm tra số điện thoại
+        $phone_pattern = '/^0[0-9]{9,10}$/';
+        if (!preg_match($phone_pattern, $phone)) {
+            $errors[] = "Số điện thoại không hợp lệ! Vui lòng nhập số có 10-11 chữ số, bắt đầu bằng 0.";
+        }
+
+        if (empty($errors)) {
+            $conn->begin_transaction(); // Bắt đầu giao dịch
+            try {
+                $query = "INSERT INTO orders (user_id, session_id, fullname, email, phone_number, address, note, total_money, status, payment_status) 
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'pending')";
+                $stmt = $conn->prepare($query);
+                if ($stmt === false) {
+                    throw new Exception("Lỗi prepare: " . $conn->error);
+                }
+                $stmt->bind_param('isssssss', $user_id, $session_id, $fullname, $email, $phone, $address, $note, $total);
+                if (!$stmt->execute()) {
+                    throw new Exception("Lỗi khi tạo đơn hàng: " . $conn->error);
+                }
                 $order_id = $conn->insert_id;
-                // ... (giữ nguyên phần insert vào order_items và xóa Carts)
+                $stmt->close();
+
+                // Thêm order_items
                 foreach ($cart_items as $item) {
                     $price = $item['price'] - ($item['discount'] ?? 0);
                     $subtotal = $price * $item['quantity'];
-                    $product_id = $item['product_id'] ?? $item['product_variant_id'];
+                    $product_variant_id = $item['product_variant_id'] ?? null; // Sử dụng product_variant_id thay vì product_id
                     $query = "INSERT INTO order_items (order_id, product_variant_id, quantity, price, total_money, payment_method) 
                               VALUES (?, ?, ?, ?, ?, 'online')";
                     $stmt_detail = $conn->prepare($query);
                     if ($stmt_detail === false) {
-                        echo "<pre>Debug Error - Prepare failed: " . $conn->error . " (Query: $query)</pre>";
-                        error_log("Prepare failed: " . $conn->error . " (Query: $query)");
-                    } else {
-                        $stmt_detail->bind_param('iiddd', $order_id, $product_id, $item['quantity'], $price, $subtotal);
-                        $stmt_detail->execute();
-                        $stmt_detail->close();
+                        throw new Exception("Lỗi prepare order_items: " . $conn->error);
                     }
+                    $stmt_detail->bind_param('iiidd', $order_id, $product_variant_id, $item['quantity'], $price, $subtotal); // Sửa 'iidd' thành 'iiidd'
+                    $stmt_detail->execute();
+                    $stmt_detail->close();
                 }
+
+                // Cập nhật tồn kho
+                $stmt = $conn->prepare("SELECT product_variant_id, quantity FROM order_items WHERE order_id = ?");
+                if ($stmt === false) {
+                    throw new Exception("Lỗi truy vấn chi tiết đơn hàng: " . $conn->error);
+                }
+                $stmt->bind_param('i', $order_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $order_items = $result->fetch_all(MYSQLI_ASSOC);
+                $stmt->close();
+
+                foreach ($order_items as $item) {
+                    $variant_id = $item['product_variant_id'];
+                    $quantity = $item['quantity'];
+                    $stmt = $conn->prepare("SELECT stock FROM product_variants WHERE id = ? FOR UPDATE");
+                    if ($stmt === false) {
+                        throw new Exception("Lỗi truy vấn tồn kho: " . $conn->error);
+                    }
+                    $stmt->bind_param('i', $variant_id);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $variant = $result->fetch_assoc();
+                    $stmt->close();
+
+                    if (!$variant || $variant['stock'] < $quantity) {
+                        throw new Exception("Sản phẩm (variant_id: $variant_id) không đủ tồn kho. Hiện tại: " . ($variant['stock'] ?? 0) . ", yêu cầu: $quantity.");
+                    }
+
+                    $stmt = $conn->prepare("UPDATE product_variants SET stock = stock - ? WHERE id = ?");
+                    if ($stmt === false) {
+                        throw new Exception("Lỗi cập nhật tồn kho: " . $conn->error);
+                    }
+                    $stmt->bind_param('ii', $quantity, $variant_id);
+                    $stmt->execute();
+                    $stmt->close();
+                }
+
+                // Xóa Carts nếu không phải buy_now
                 if (!$is_buy_now && !empty($checkout_items)) {
                     $ids = implode(',', array_map('intval', $checkout_items));
                     $condition = $user_id ? "user_id = ?" : "session_id = ?";
                     $param = $user_id ?: $session_id;
                     $type = $user_id ? 'i' : 's';
-                    
                     $query = "DELETE FROM Carts WHERE $condition AND id IN ($ids)";
                     $stmt = $conn->prepare($query);
                     if ($stmt === false) {
-                        echo "<pre>Debug Error - Prepare failed: " . htmlspecialchars($conn->error) . " (Query: $query)</pre>";
-                        error_log("Prepare failed: " . $conn->error . " (Query: $query)");
-                    } else {
-                        $stmt->bind_param($type, $param);
-                        if (!$stmt->execute()) {
-                            echo "<pre>Debug Error - Execute failed: " . htmlspecialchars($stmt->error) . " (Query: $query)</pre>";
-                            error_log("Execute failed: " . $stmt->error . " (Query: $query)");
-                        }
-                        $stmt->close();
+                        throw new Exception("Lỗi prepare xóa Carts: " . $conn->error);
                     }
+                    $stmt->bind_param($type, $param);
+                    $stmt->execute();
+                    $stmt->close();
                 }
+
+                $conn->commit(); // Hoàn tất giao dịch
                 unset($_SESSION['csrf_token']);
                 unset($_SESSION['checkout_items']);
                 ob_end_clean(); // Xóa bộ đệm trước khi redirect
                 header('Location: payment.php?order_id=' . $order_id);
                 exit;
-            } else {
-                $error = "Lỗi khi tạo đơn hàng: " . $conn->error;
-                echo "<pre>Debug Error - Execute failed: " . $conn->error . "</pre>";
-                error_log("Execute failed: " . $conn->error);
+            } catch (Exception $e) {
+                $conn->rollback(); // Hoàn tác giao dịch nếu có lỗi
+                $errors[] = "Lỗi khi xử lý đơn hàng: " . $e->getMessage();
+                error_log("Checkout failed: " . $e->getMessage());
             }
-            $stmt->close();
         }
     }
 }
@@ -204,13 +255,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Thanh Toán</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="/eProject%201/F/assets/css/style.css"> <!-- Thay đổi đường dẫn phù hợp -->
 </head>
 
 <body>
     <div class="container mx-auto my-5">
         <h1 class="text-3xl font-bold text-center mb-5">Thanh Toán</h1>
-        <?php if (isset($error)) echo "<p class='text-red-500 text-center mb-4'>$error</p>"; ?>
+        <?php if (!empty($errors)): ?>
+            <?php foreach ($errors as $error): ?>
+                <p class="text-red-500 text-center mb-4"><?php echo htmlspecialchars($error); ?></p>
+            <?php endforeach; ?>
+        <?php endif; ?>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <h2 class="text-2xl font-semibold mb-4">Thông Tin Đặt Hàng</h2>
@@ -274,7 +329,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     include $footer_url;
     ?>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="assets/js/main.js"></script>
+    <script src="/eProject%201/F/assets/js/main.js"></script> <!-- Thay đổi đường dẫn phù hợp -->
 </body>
 
 </html>

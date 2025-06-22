@@ -34,7 +34,7 @@ if ($check_stmt === false) {
     error_log("Prepare failed (check): " . $conn->error . " (Query: SELECT id FROM orders WHERE id = $order_id AND $identifier = ?)");
     die('<div class="container mx-auto my-5 text-center text-red-500">Lỗi khi kiểm tra đơn hàng.</div>');
 }
-$check_stmt->bind_param('iis', $order_id, $identifier_value, $session_id);
+$check_stmt->bind_param('iss', $order_id, $identifier_value, $session_id); // Sửa 'iis' thành 'iss'
 $check_stmt->execute();
 $check_result = $check_stmt->get_result();
 $order = $check_result->fetch_assoc();
@@ -45,43 +45,51 @@ if (!$order) {
 }
 error_log("Debug - Order found: payment_status = " . ($order['payment_status'] ?? 'null') . ", session_id = " . ($order['session_id'] ?? 'NULL'));
 
-// Thực hiện cập nhật
-$stmt = $conn->prepare("UPDATE orders SET payment_status = 'pending' WHERE id = ? AND $identifier = ?");
-if ($stmt === false) {
-    error_log("Prepare failed: " . $conn->error . " (Query: UPDATE orders WHERE id = $order_id AND $identifier = ?), Columns: " . json_encode($conn->error_list));
-    die('<div class="container mx-auto my-5 text-center text-red-500">Lỗi khi cập nhật trạng thái thanh toán.</div>');
-}
+// Thực hiện cập nhật chỉ khi payment_status chưa là 'completed'
+if ($order['payment_status'] !== 'completed') {
+    $stmt = $conn->prepare("UPDATE orders SET payment_status = 'completed' WHERE id = ? AND $identifier = ? AND payment_status = 'pending'");
+    if ($stmt === false) {
+        error_log("Prepare failed: " . $conn->error . " (Query: UPDATE orders WHERE id = $order_id AND $identifier = ?), Columns: " . json_encode($conn->error_list));
+        die('<div class="container mx-auto my-5 text-center text-red-500">Lỗi khi cập nhật trạng thái thanh toán.</div>');
+    }
 
-$stmt->bind_param('ii', $order_id, $identifier_value);
-if ($session_id) {
-    $stmt->bind_param('is', $order_id, $identifier_value);
-}
-if ($stmt->execute()) {
-    error_log("Payment confirmed successfully: order_id = $order_id, Affected rows: " . $stmt->affected_rows);
-    
-    // Xóa các bản ghi trong bảng Carts
-    $delete_stmt = $conn->prepare("DELETE FROM Carts WHERE $identifier = ?");
-    if ($delete_stmt === false) {
-        error_log("Prepare failed (delete Carts): " . $conn->error . " (Query: DELETE FROM Carts WHERE $identifier = ?)");
+    $stmt->bind_param('ii', $order_id, $identifier_value);
+    if ($session_id) {
+        $stmt->bind_param('is', $order_id, $identifier_value);
+    }
+    if ($stmt->execute()) {
+        $affected_rows = $stmt->affected_rows;
+        error_log("Payment confirmed successfully: order_id = $order_id, Affected rows: $affected_rows");
+
+        // Xóa các bản ghi trong bảng Carts
+        $delete_stmt = $conn->prepare("DELETE FROM carts WHERE $identifier = ?");
+        if ($delete_stmt === false) {
+            error_log("Prepare failed (delete carts): " . $conn->error . " (Query: DELETE FROM carts WHERE $identifier = ?)");
+        } else {
+            $delete_stmt->bind_param($user_id ? 'i' : 's', $identifier_value);
+            $delete_stmt->execute();
+            error_log("Cart deleted from DB for $identifier = " . htmlspecialchars($identifier_value) . ", Affected rows: " . $delete_stmt->affected_rows);
+            $delete_stmt->close();
+        }
+
+        // Xóa giỏ hàng trong session
+        if (isset($_SESSION['cart'])) {
+            unset($_SESSION['cart']);
+            error_log("Cart cleared from session for order_id = $order_id");
+        }
+
+        unset($_SESSION['csrf_token']);
+        header('Location: order_success.php?order_id=' . $order_id);
+        exit;
     } else {
-        $delete_stmt->bind_param($user_id ? 'i' : 's', $identifier_value);
-        $delete_stmt->execute();
-        error_log("Cart deleted from DB for $identifier = " . htmlspecialchars($identifier_value) . ", Affected rows: " . $delete_stmt->affected_rows);
-        $delete_stmt->close();
+        error_log("Execute failed: " . $conn->error . " (Query: UPDATE orders WHERE id = $order_id, Error: " . $conn->error . ", Affected rows: " . $stmt->affected_rows);
+        die('<div class="container mx-auto my-5 text-center text-red-500">Lỗi khi xác nhận thanh toán.</div>');
     }
-    
-    // Xóa giỏ hàng trong session
-    if (isset($_SESSION['cart'])) {
-        unset($_SESSION['cart']);
-        error_log("Cart cleared from session for order_id = $order_id");
-    }
-    
+    $stmt->close();
+} else {
+    error_log("Payment already confirmed for order_id = $order_id, skipping update.");
     unset($_SESSION['csrf_token']);
     header('Location: order_success.php?order_id=' . $order_id);
     exit;
-} else {
-    error_log("Execute failed: " . $conn->error . " (Query: UPDATE orders WHERE id = $order_id, Error: " . $conn->error . ", Affected rows: " . $stmt->affected_rows);
-    die('<div class="container mx-auto my-5 text-center text-red-500">Lỗi khi xác nhận thanh toán.</div>');
 }
-$stmt->close();
 ?>
