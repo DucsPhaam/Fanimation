@@ -20,6 +20,17 @@ if ($product_id > 0) {
     $errors[] = 'Invalid product ID.';
 }
 
+// Fetch product details
+$product_details = [];
+if ($product_id > 0) {
+    $stmt = mysqli_prepare($conn, "SELECT * FROM product_details WHERE product_id = ?");
+    mysqli_stmt_bind_param($stmt, 'i', $product_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $product_details = mysqli_fetch_assoc($result) ?: [];
+    mysqli_stmt_close($stmt);
+}
+
 // Fetch product variants
 $variants = [];
 if ($product_id > 0) {
@@ -39,6 +50,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
     $category_id = (int)($_POST['category_id'] ?? 0);
     $brand_id = (int)($_POST['brand_id'] ?? 0);
     $price = (float)($_POST['price'] ?? 0);
+    $size = trim($_POST['size'] ?? '');
+    $material = trim($_POST['material'] ?? '');
+    $motor_type = trim($_POST['motor_type'] ?? '');
+    $blade_count = (int)($_POST['blade_count'] ?? 0);
+    $light_kit_included = (int)($_POST['light_kit_included'] ?? 0);
+    $remote_control = (int)($_POST['remote_control'] ?? 0);
+    $airflow_cfm = (int)($_POST['airflow_cfm'] ?? 0);
+    $power_consumption = (int)($_POST['power_consumption'] ?? 0);
+    $warranty_years = (int)($_POST['warranty_years'] ?? 0);
+    $additional_info = trim($_POST['additional_info'] ?? '');
     $colors = $_POST['colors'] ?? [];
     $stocks = $_POST['stocks'] ?? [];
 
@@ -48,6 +69,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
     if ($brand_id <= 0) $errors[] = 'Please select a brand.';
     if ($price <= 0) $errors[] = 'Price must be greater than 0.';
     if (empty($colors) || empty($stocks)) $errors[] = 'At least one color and stock quantity are required.';
+    if ($blade_count < 0) $errors[] = 'Blade count cannot be negative.';
+    if ($airflow_cfm < 0) $errors[] = 'Airflow CFM cannot be negative.';
+    if ($power_consumption < 0) $errors[] = 'Power consumption cannot be negative.';
+    if ($warranty_years < 0) $errors[] = 'Warranty years cannot be negative.';
 
     // Validate colors and stocks
     foreach ($colors as $index => $color_id) {
@@ -75,6 +100,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
             mysqli_stmt_bind_param($stmt, 'ssiiid', $name, $description, $category_id, $brand_id, $price, $product_id);
             if (!mysqli_stmt_execute($stmt)) {
                 throw new Exception('Failed to update product: ' . mysqli_error($conn));
+            }
+            mysqli_stmt_close($stmt);
+
+            // Update or insert product details
+            $query = "SELECT id FROM product_details WHERE product_id = ?";
+            $stmt = mysqli_prepare($conn, $query);
+            mysqli_stmt_bind_param($stmt, 'i', $product_id);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            $details_id = mysqli_fetch_assoc($result)['id'] ?? null;
+            mysqli_stmt_close($stmt);
+
+            if ($details_id) {
+                $query = "UPDATE product_details SET size = ?, material = ?, motor_type = ?, blade_count = ?, light_kit_included = ?, remote_control = ?, airflow_cfm = ?, power_consumption = ?, warranty_years = ?, additional_info = ? WHERE id = ?";
+                $stmt = mysqli_prepare($conn, $query);
+                mysqli_stmt_bind_param($stmt, 'ssssiiiisii', $size, $material, $motor_type, $blade_count, $light_kit_included, $remote_control, $airflow_cfm, $power_consumption, $warranty_years, $additional_info, $details_id);
+            } else {
+                $query = "INSERT INTO product_details (product_id, size, material, motor_type, blade_count, light_kit_included, remote_control, airflow_cfm, power_consumption, warranty_years, additional_info) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmt = mysqli_prepare($conn, $query);
+                mysqli_stmt_bind_param($stmt, 'isssiiiissi', $product_id, $size, $material, $motor_type, $blade_count, $light_kit_included, $remote_control, $airflow_cfm, $power_consumption, $warranty_years, $additional_info);
+            }
+            if (!mysqli_stmt_execute($stmt)) {
+                throw new Exception('Failed to update product details: ' . mysqli_error($conn));
             }
             mysqli_stmt_close($stmt);
 
@@ -124,7 +172,7 @@ $colors = getColors($conn);
     <title>Fanimation - Edit Product</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQov1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="<?= $base_url ?>/assets/css/header.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/assets/fonts/font.php'; ?>
@@ -168,6 +216,54 @@ $colors = getColors($conn);
                             <label for="price" class="form-label">Price ($)</label>
                             <input type="number" step="0.01" class="form-control" id="price" name="price" value="<?= htmlspecialchars($product['product_price']); ?>" required>
                         </div>
+                        <!-- Product Details -->
+                        <div class="mb-3">
+                            <label for="size" class="form-label">Size (e.g., 52 inches)</label>
+                            <input type="text" class="form-control" id="size" name="size" value="<?= htmlspecialchars($product_details['size'] ?? ''); ?>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="material" class="form-label">Material (e.g., Wood, Metal)</label>
+                            <input type="text" class="form-control" id="material" name="material" value="<?= htmlspecialchars($product_details['material'] ?? ''); ?>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="motor_type" class="form-label">Motor Type (e.g., AC, DC)</label>
+                            <input type="text" class="form-control" id="motor_type" name="motor_type" value="<?= htmlspecialchars($product_details['motor_type'] ?? ''); ?>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="blade_count" class="form-label">Blade Count</label>
+                            <input type="number" class="form-control" id="blade_count" name="blade_count" value="<?= htmlspecialchars($product_details['blade_count'] ?? ''); ?>" min="0">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Light Kit Included</label>
+                            <select class="form-select" name="light_kit_included">
+                                <option value="0" <?= ($product_details['light_kit_included'] ?? 0) == 0 ? 'selected' : ''; ?>>No</option>
+                                <option value="1" <?= ($product_details['light_kit_included'] ?? 0) == 1 ? 'selected' : ''; ?>>Yes</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Remote Control</label>
+                            <select class="form-select" name="remote_control">
+                                <option value="0" <?= ($product_details['remote_control'] ?? 0) == 0 ? 'selected' : ''; ?>>No</option>
+                                <option value="1" <?= ($product_details['remote_control'] ?? 0) == 1 ? 'selected' : ''; ?>>Yes</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="airflow_cfm" class="form-label">Airflow CFM</label>
+                            <input type="number" class="form-control" id="airflow_cfm" name="airflow_cfm" value="<?= htmlspecialchars($product_details['airflow_cfm'] ?? ''); ?>" min="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="power_consumption" class="form-label">Power Consumption (Watt)</label>
+                            <input type="number" class="form-control" id="power_consumption" name="power_consumption" value="<?= htmlspecialchars($product_details['power_consumption'] ?? ''); ?>" min="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="warranty_years" class="form-label">Warranty Years</label>
+                            <input type="number" class="form-control" id="warranty_years" name="warranty_years" value="<?= htmlspecialchars($product_details['warranty_years'] ?? ''); ?>" min="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="additional_info" class="form-label">Additional Info</label>
+                            <textarea class="form-control" id="additional_info" name="additional_info"><?= htmlspecialchars($product_details['additional_info'] ?? ''); ?></textarea>
+                        </div>
+                        <!-- End Product Details -->
                         <div class="mb-3">
                             <label class="form-label">Colors and Stock</label>
                             <div id="color-stock-container">
