@@ -2,6 +2,7 @@
 ob_start();
 include $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/includes/config.php';
 require $db_connect_url;
+require $function_url;
 include $header_url;
 
 // Khởi tạo session_id cho khách vãng lai nếu chưa có
@@ -15,14 +16,24 @@ if (!isset($_SESSION['guest_session_id'])) {
 // Xử lý gửi đánh giá (giữ nguyên, chỉ cho phép người dùng đăng nhập)
 $success = '';
 $error = '';
-$product_id = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : 0;
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_feedback']) && $product_id > 0) {
+$product_slug = isset($_GET['slug']) ? htmlspecialchars($_GET['slug']) : '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_feedback']) && $product_slug !== '') {
     if (isset($_SESSION['user_id'])) {
         $rating = (int)$_POST['rating'];
         $message = mysqli_real_escape_string($conn, trim($_POST['message']));
         $user_id = (int)$_SESSION['user_id'];
 
-        if ($rating >= 1 && $rating <= 5) {
+        // Lấy product_id từ slug để sử dụng trong feedback
+        $product_query = "SELECT id FROM products WHERE slug = ?";
+        $product_stmt = mysqli_prepare($conn, $product_query);
+        mysqli_stmt_bind_param($product_stmt, 's', $product_slug);
+        mysqli_stmt_execute($product_stmt);
+        $product_result = mysqli_stmt_get_result($product_stmt);
+        $product_row = mysqli_fetch_assoc($product_result);
+        mysqli_stmt_close($product_stmt);
+        $product_id = $product_row['id'] ?? 0;
+
+        if ($product_id > 0 && $rating >= 1 && $rating <= 5) {
             $check_query = "SELECT COUNT(*) as count FROM feedbacks WHERE user_id = ? AND product_id = ? AND created_at > NOW() - INTERVAL 1 DAY";
             $check_stmt = mysqli_prepare($conn, $check_query);
             if ($check_stmt) {
@@ -53,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_feedback']) &&
                 $error = "Lỗi kiểm tra trùng lặp: " . mysqli_error($conn);
             }
         } else {
-            $error = "Số sao phải từ 1 đến 5!";
+            $error = $product_id > 0 ? "Số sao phải từ 1 đến 5!" : "Sản phẩm không hợp lệ!";
         }
     } else {
         $error = "Vui lòng đăng nhập để gửi đánh giá!";
@@ -61,32 +72,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_feedback']) &&
 }
 
 // Lấy danh sách feedback
-if ($product_id <= 0) {
-    $feedback_error = "<div class='alert alert-danger'>ID sản phẩm không hợp lệ.</div>";
+if ($product_slug === '') {
+    $feedback_error = "<div class='alert alert-danger'>Slug sản phẩm không hợp lệ.</div>";
 } else {
-    $stmt = $conn->prepare("
-        SELECT f.rating, f.message, f.created_at, u.name
-        FROM feedbacks f
-        LEFT JOIN users u ON f.user_id = u.id
-        WHERE f.product_id = ? AND f.status = 'approved'
-        ORDER BY f.created_at DESC
-    ");
-    if ($stmt === false) {
-        $feedback_error = "<div class='alert alert-danger'>Lỗi chuẩn bị truy vấn Feedbacks: " . htmlspecialchars($conn->error) . "</div>";
-    } else {
-        $stmt->bind_param("i", $product_id);
-        if ($stmt->execute()) {
-            $result = $stmt->get_result();
-            $feedbacks = $result->fetch_all(MYSQLI_ASSOC);
+    // Lấy product_id từ slug
+    $product_query = "SELECT id FROM products WHERE slug = ?";
+    $product_stmt = mysqli_prepare($conn, $product_query);
+    mysqli_stmt_bind_param($product_stmt, 's', $product_slug);
+    mysqli_stmt_execute($product_stmt);
+    $product_result = mysqli_stmt_get_result($product_stmt);
+    $product_row = mysqli_fetch_assoc($product_result);
+    mysqli_stmt_close($product_stmt);
+    $product_id = $product_row['id'] ?? 0;
+
+    if ($product_id > 0) {
+        $stmt = $conn->prepare("
+            SELECT f.rating, f.message, f.created_at, u.name
+            FROM feedbacks f
+            LEFT JOIN users u ON f.user_id = u.id
+            WHERE f.product_id = ? AND f.status = 'approved'
+            ORDER BY f.created_at DESC
+        ");
+        if ($stmt === false) {
+            $feedback_error = "<div class='alert alert-danger'>Lỗi chuẩn bị truy vấn Feedbacks: " . htmlspecialchars($conn->error) . "</div>";
         } else {
-            $feedback_error = "<div class='alert alert-danger'>Lỗi thực thi truy vấn: " . htmlspecialchars($stmt->error) . "</div>";
+            $stmt->bind_param("i", $product_id);
+            if ($stmt->execute()) {
+                $result = $stmt->get_result();
+                $feedbacks = $result->fetch_all(MYSQLI_ASSOC);
+            } else {
+                $feedback_error = "<div class='alert alert-danger'>Lỗi thực thi truy vấn: " . htmlspecialchars($stmt->error) . "</div>";
+            }
+            $stmt->close();
         }
-        $stmt->close();
+    } else {
+        $feedback_error = "<div class='alert alert-danger'>Sản phẩm không tồn tại.</div>";
     }
 }
 
 // Lấy chi tiết sản phẩm
-$product = getProductById($conn, $product_id);
+$product = getProductBySlug($conn, $product_slug);
 if (!$product) {
     echo "<div class='alert alert-danger'>Sản phẩm không tồn tại hoặc đã hết hàng.</div>";
     include $footer_url;
@@ -95,7 +120,7 @@ if (!$product) {
 }
 
 // Lấy thông tin chi tiết sản phẩm từ bảng product_details
-$product_details = getProductDetailsById($conn, $product_id);
+$product_details = getProductDetailsById($conn, $product['product_id']);
 
 // Lấy hình ảnh và tồn kho theo màu
 $images = [];
@@ -109,7 +134,7 @@ $stmt = $conn->prepare($sql);
 if ($stmt === false) {
     echo "<div class='debug'>Lỗi chuẩn bị truy vấn hình ảnh: " . htmlspecialchars($conn->error) . "</div>";
 } else {
-    $stmt->bind_param('i', $product_id);
+    $stmt->bind_param('i', $product['product_id']);
     if ($stmt->execute()) {
         $result = $stmt->get_result();
         while ($row = $result->fetch_assoc()) {
@@ -215,8 +240,8 @@ if ($stmt === false) {
         gap: 20px;
         margin-top: 20px;
         margin-bottom: 20px;
-        align-items: center; /* Center links vertically */
-        justify-content: center; /* Center links horizontally */
+        align-items: center;
+        justify-content: center;
     }
 
     .nav-links a {
@@ -239,8 +264,8 @@ if ($stmt === false) {
     }
 
     #details-section {
-        width: 100%; 
-        margin: 0 auto; /* Center horizontally */
+        width: 100%;
+        margin: 0 auto;
         transition: opacity 0.3s ease, height 0.3s ease;
         padding: 50px 0 50px 0;
     }
@@ -369,7 +394,7 @@ if ($stmt === false) {
 
                 <p><strong>Giá:</strong></p>
                 <div class="fs-1 fw-bold text-danger">
-                    <?php echo number_format($product['product_price'], 0, ',', '.'); ?>₫
+                    <?php echo number_format($product['product_price'], 0, ',', '.'); ?>$
                 </div>
 
                 <button class="btn btn-danger add-to-cart"

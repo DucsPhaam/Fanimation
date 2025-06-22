@@ -104,7 +104,7 @@ $brands = getBrands($conn);
 <div id="contactCarousel" class="carousel slide">
     <div class="carousel-inner">
         <div class="carousel-item active">
-            <img src="../assets/images/banners/banner_product_page.jpg" alt="Banner Product Image" class="d-block w-100">
+            <img src="/Fanimation/assets/images/banners/banner_product_page.jpg" alt="Banner Product Image" class="d-block w-100">
             <div class="carousel-content">
                 <h1>Products</h1>
             </div>
@@ -195,7 +195,7 @@ $brands = getBrands($conn);
                 <?php else: ?>
                     <?php foreach ($products as $product): ?>
                         <div class="col-lg-2-4 col-md-4 col-sm-6 mb-4 position-relative">
-                            <a href="product_detail.php?id=<?php echo htmlspecialchars($product['product_id']); ?>" style="text-decoration: none;">
+                            <a href="/Fanimation/product/<?php echo $product['product_slug']; ?>" style="text-decoration: none;">
                                 <div class="card product-card h-auto position-relative">
                                     <div class="image-container">
                                         <div class="rating">
