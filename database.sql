@@ -51,6 +51,24 @@ CREATE TABLE products (
     FOREIGN KEY (brand_id) REFERENCES brands(id)
 )AUTO_INCREMENT = 1;
 
+-- Tạo bảng product_details
+CREATE TABLE product_details (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    size VARCHAR(100), -- Kích thước (ví dụ: "52 inches", "44 inches")
+    material VARCHAR(255), -- Chất liệu (ví dụ: "Wood", "Metal", "Plastic")
+    motor_type VARCHAR(100), -- Loại động cơ (ví dụ: "AC", "DC")
+    blade_count INT, -- Số lượng cánh quạt
+    light_kit_included TINYINT(1) DEFAULT 0, -- Có bao gồm bộ đèn không (0: Không, 1: Có)
+    remote_control TINYINT(1) DEFAULT 0, -- Có điều khiển từ xa không (0: Không, 1: Có)
+    airflow_cfm INT, -- Lưu lượng gió (Cubic Feet per Minute)
+    power_consumption INT, -- Công suất tiêu thụ (Watt)
+    warranty_years INT, -- Thời gian bảo hành (năm)
+    additional_info TEXT, -- Thông tin bổ sung
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+)AUTO_INCREMENT = 1;
+
 -- Tạo bảng product_variants
 CREATE TABLE product_variants (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -226,7 +244,23 @@ VALUES
 	('Klout', 'A powerful ceiling fan with an angular design, combined with lighting, suitable for commercial settings.', 1, 1, 280.00),
 	('Kute', 'An elegant ceiling fan available in 44-52 inch sizes, offering a balance of style and efficiency.', 1, 1, 210.00),
 	('Kwartet', 'A unique four-blade ceiling fan with integrated LED lighting, ideal for artistic spaces or large living rooms.', 1, 1, 260.00);
-    
+
+INSERT INTO product_details (product_id, size, material, motor_type, blade_count, light_kit_included, remote_control, airflow_cfm, power_consumption, warranty_years, additional_info)
+VALUES
+    (1, '52 inches', 'Metal, ABS Plastic', 'DC', 3, 1, 1, 5500, 35, 5, 'Integrated LED light, smart control compatible'), -- Amped
+    (2, '44 inches', 'Wood, Metal', 'AC', 5, 0, 1, 4500, 60, 3, 'Minimalist design for modern interiors'), -- Aviara
+    (3, '60 inches', 'Wood', 'AC', 5, 1, 0, 6000, 70, 5, 'Classic design with decorative lighting'), -- Barlow
+    (4, '72 inches', 'Metal', 'DC', 6, 0, 1, 8000, 50, 7, 'Industrial-grade for large spaces'), -- Brawn
+    (5, '52 inches', 'Wood, Metal', 'DC', 5, 0, 1, 5200, 40, 5, 'Versatile size options for all interiors'), -- Edgewood
+    (6, '56 inches', 'ABS Plastic, Metal', 'DC', 4, 1, 1, 5800, 45, 5, 'Smart technology integration'), -- Influencer
+    (7, '60 inches', 'Natural Wood', 'AC', 5, 0, 1, 6200, 65, 3, 'Tropical-inspired design'), -- Islander
+    (8, '48 inches', 'Metal', 'DC', 3, 1, 1, 5000, 38, 5, 'Sharp lines, ideal for offices'), -- Kerring
+    (9, '52 inches', 'Transparent ABS', 'DC', 4, 0, 1, 5400, 42, 5, 'Innovative transparent blade design'), -- Klear
+    (10, '36 inches', 'Metal, ABS Plastic', 'DC', 3, 0, 1, 4000, 30, 3, 'Compact for small rooms'), -- Klinch
+    (11, '60 inches', 'Metal', 'DC', 5, 1, 1, 6500, 55, 5, 'Angular design for commercial spaces'), -- Klout
+    (12, '48 inches', 'Wood, Metal', 'DC', 4, 0, 1, 4800, 35, 5, 'Elegant and efficient'), -- Kute
+    (13, '56 inches', 'Metal, Wood', 'DC', 4, 1, 1, 5700, 40, 5, 'Unique four-blade design with LED'); -- Kwartet
+
 INSERT INTO colors (name, hex_code)
 VALUES 
     ('Matte White', '#F4F4F4'),
