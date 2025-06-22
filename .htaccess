@@ -1,0 +1,6 @@
+# Bật Rewrite Engine
+RewriteEngine On
+RewriteBase /Fanimation/
+
+# 🔁 Route sản phẩm theo slug: /product/slug → pages/product_detail.php?slug=...
+RewriteRule ^product/([a-z0-9-]+)$ pages/product_detail.php?slug=$1 [L,QSA]
