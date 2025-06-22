@@ -107,8 +107,8 @@ include $header_url;
     <video src="<?php echo $base_url; ?>/assets/images/banners/March25_CCT_Select_v06.mp4" autoplay loop muted></video>
 </div>
 <div class="content-2">
-    <a href="<?php echo $base_url; ?>/products"><img src="<?php echo $base_url; ?>/assets/images/banners/banner-fanimation-studio1_hover.jpg" alt=""></a>
-    <a href="<?php echo $base_url; ?>/products"><img src="<?php echo $base_url; ?>/assets/images/banners/showroomcollection2018_hover.jpg" alt=""></a>
+    <a href="<?php echo $products_url; ?>"><img src="<?php echo $base_url; ?>/assets/images/banners/banner-fanimation-studio1_hover.jpg" alt=""></a>
+    <a href="<?php echo $products_url; ?>"><img src="<?php echo $base_url; ?>/assets/images/banners/showroomcollection2018_hover.jpg" alt=""></a>
 </div>
 <div class="plx-image2">
     <div class="box-content">
