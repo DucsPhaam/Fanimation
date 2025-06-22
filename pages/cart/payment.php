@@ -101,7 +101,7 @@ if (!$error) {
                     <h2 class="text-2xl font-semibold mb-4">Danh Sách Sản Phẩm</h2>
                     <?php foreach ($order_details as $item): ?>
                         <div class="flex items-center mb-4">
-                            <img src="<?php echo '../' . htmlspecialchars($item['image_url'] ?? 'assets/images/default.jpg'); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="h-16 w-16 object-cover mr-4">
+                            <img src="<?php echo htmlspecialchars($item['image_url'] ?? 'assets/images/default.jpg'); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="h-16 w-16 object-cover mr-4">
                             <div>
                                 <p class="font-semibold"><?php echo htmlspecialchars($item['name']); ?></p>
                                 <p>Số lượng: <?php echo $item['quantity']; ?></p>

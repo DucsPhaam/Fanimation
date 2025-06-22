@@ -65,8 +65,24 @@ function getColorHex($color_id) {
     return $result['hex_code'] ?? '#000000';
 }
 ?>
+<style>
+.body-container {
+    height: 60vh;
+    /* display: flex; */
+    justify-content: center;
+    align-items: flex-start; /* Để bảng nằm trên cùng, không giữa dọc */
+    padding-top: 20px; /* Khoảng cách từ đầu trang */
+}
 
-<div class="container mt-4">
+.table-bordered {
+    width: 70%;
+    margin: 0 auto; /* Căn giữa theo chiều ngang */
+    border-collapse: collapse; /* Đảm bảo viền liền mạch */
+}
+
+
+</style>
+<div class="body-container mt-4">
     <h2 class="text-center">Giỏ hàng</h2>
     <?php if (empty($_SESSION['cart'])): ?>
         <p class="text-center">Giỏ hàng của bạn đang trống.</p>
@@ -119,7 +135,9 @@ function getColorHex($color_id) {
                 </tr>
             </tbody>
         </table>
-        <a href="checkout.php?items=<?php echo htmlspecialchars(implode(',', array_column($_SESSION['cart'], 'cart_id'))); ?>" class="btn btn-success">Thanh toán</a>
+        <div class="text-center mt-3"> <!-- Căn giữa nút Thanh toán -->
+            <a href="checkout.php?items=<?php echo htmlspecialchars(implode(',', array_column($_SESSION['cart'], 'cart_id'))); ?>" class="btn btn-success">Thanh toán</a>
+        </div>
         <?php if ($user_id === null): ?>
             <p class="text-center mt-3">
                 <a href="login.php?redirect=cart.php">Đăng nhập</a> hoặc <a href="register.php">Đăng ký</a> để lưu giỏ hàng và theo dõi đơn hàng dễ dàng hơn!
