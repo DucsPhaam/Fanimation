@@ -195,7 +195,6 @@ if (!function_exists('getProductById')) {
     }
 }
 
-// Your existing functions remain unchanged
 if (!function_exists('getAllProducts')) {
     function getAllProducts() {
         global $conn;
@@ -250,7 +249,6 @@ if (!function_exists('getCountOrders')) {
         return $row['count'];
     }
 }
-
 
 if (!function_exists('getMonthlySales')) {
     function getMonthlySales() {
@@ -765,8 +763,6 @@ if (!function_exists('getAllUsers')) {
     }
 }
 
-
-// Get distinct categories for filter dropdown
 if (!function_exists('getCategories')) {
     function getCategories($conn){
         if (!$conn->ping()) {
@@ -788,10 +784,9 @@ if (!function_exists('getCategories')) {
         return $categories;
     }
 }
-// Get distinct colors for filter dropdown
+
 if (!function_exists('getColors')) {
-function getColors($conn)
-    {
+    function getColors($conn) {
         if (!$conn->ping()) {
             error_log("Kết nối cơ sở dữ liệu đã bị đóng trong getColors.");
             return [];
@@ -811,10 +806,9 @@ function getColors($conn)
         return $colors;
     }
 }
-// Get distinct brands for filter dropdown
+
 if (!function_exists('getBrands')) {
-    function getBrands($conn)
-    {
+    function getBrands($conn) {
         if (!$conn->ping()) {
             error_log("Kết nối cơ sở dữ liệu đã bị đóng trong getBrands.");
             return [];
@@ -834,10 +828,9 @@ if (!function_exists('getBrands')) {
         return $brands;
     }
 }
-// New function to get image by color
+
 if (!function_exists('getImageByColor')) {
-    function getImageByColor($conn, $product_id, $color_id)
-    {
+    function getImageByColor($conn, $product_id, $color_id) {
         if (!$conn->ping()) {
             error_log("Kết nối cơ sở dữ liệu đã bị đóng trong getImageByColor.");
             return null;
@@ -856,25 +849,6 @@ if (!function_exists('getImageByColor')) {
         $stmt->close();
         return $image ? $image['image_url'] : null;
     }
-}
-// Check stock availability
-$action = $_POST['action'] ?? '';
-
-if ($action === 'getStock' || $action === 'checkStock') {
-    ob_clean();
-    header('Content-Type: application/json');
-    header('Access-Control-Allow-Origin: *'); // Adjust for security
-    header('Access-Control-Allow-Methods: POST');
-    header('Access-Control-Allow-Headers: Content-Type');
-
-    $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
-    $color_id = isset($_POST['color_id']) ? intval($_POST['color_id']) : 0;
-    $quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1;
-
-    error_log("Received POST data: " . json_encode($_POST));
-    $result = checkStockAvailability($product_id, $color_id, $quantity, $conn);
-    echo json_encode($result);
-    exit;
 }
 
 if (!function_exists('checkStockAvailability')) {
@@ -937,6 +911,33 @@ if (!function_exists('checkStockAvailability')) {
 
         error_log("Stock check success: available stock = " . $result['stock']);
         return ['status' => 'success', 'stock' => (int)$result['stock']];
+    }
+}
+
+if (!function_exists('getProductDetailsById')) {
+    function getProductDetailsById($conn, $product_id) {
+        if (!$conn->ping()) {
+            error_log("Kết nối cơ sở dữ liệu đã bị đóng trong getProductDetailsById.");
+            return null;
+        }
+
+        $query = "SELECT size, material, motor_type, blade_count, light_kit_included, remote_control, airflow_cfm, power_consumption, warranty_years, additional_info
+                  FROM product_details
+                  WHERE product_id = ?";
+        
+        $stmt = $conn->prepare($query);
+        if ($stmt === false) {
+            error_log("Lỗi chuẩn bị truy vấn trong getProductDetailsById: " . $conn->error);
+            return null;
+        }
+
+        $stmt->bind_param('i', $product_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $details = $result->fetch_assoc();
+        $stmt->close();
+
+        return $details;
     }
 }
 ?>
