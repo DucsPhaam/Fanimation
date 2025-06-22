@@ -46,6 +46,7 @@ CREATE TABLE products (
     category_id INT,
     brand_id INT,
     price INT NOT NULL,
+    slug VARCHAR(255) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(id),
     FOREIGN KEY (brand_id) REFERENCES brands(id)
@@ -229,21 +230,21 @@ VALUES
     ('Exhaust fans'),
     ('Accessories');
 
-INSERT INTO products (name, description, brand_id, category_id, price)
+INSERT INTO products (name, description, brand_id, category_id, price, slug)
 VALUES
-	('Amped', 'A modern ceiling fan with a dynamic design, featuring integrated LED lighting, perfect for lively and energetic living spaces.', 1, 1, 220.00),
-	('Aviara', 'A sleek ceiling fan with thin blades, offering a minimalist style, ideal for elegant living rooms or bedrooms.', 1, 1, 240.00),
-	('Barlow', 'A classic ceiling fan with a powerful motor, combined with decorative lighting, perfect for traditional settings.', 1, 1, 210.00),
-	('Brawn', 'A robust industrial ceiling fan with a rugged design, suitable for garages or large open spaces.', 1, 1, 260.00),
-	('Edgewood', 'A versatile ceiling fan available in sizes from 44 to 72 inches, with various color options, fitting all interior styles.', 1, 1, 230.00),
-	('Influencer', 'A unique ceiling fan with a distinctive design, incorporating smart technology for a modern and convenient experience.', 1, 1, 300.00),
-	('Islander', 'A tropical-inspired ceiling fan with natural wood blades, creating a relaxing beach-like ambiance.', 1, 1, 250.00),
-	('Kerring', 'A minimalist ceiling fan with sharp lines, featuring LED lighting, ideal for offices or dining areas.', 1, 1, 225.00),
-	('Klear', 'A transparent ceiling fan with an innovative design, providing an airy and modern feel to any space.', 1, 1, 270.00),
-	('Klinch', 'A compact ceiling fan with a high-performance motor, perfect for small rooms or children''s spaces.', 1, 1, 190.00),
-	('Klout', 'A powerful ceiling fan with an angular design, combined with lighting, suitable for commercial settings.', 1, 1, 280.00),
-	('Kute', 'An elegant ceiling fan available in 44-52 inch sizes, offering a balance of style and efficiency.', 1, 1, 210.00),
-	('Kwartet', 'A unique four-blade ceiling fan with integrated LED lighting, ideal for artistic spaces or large living rooms.', 1, 1, 260.00);
+    ('Amped', 'A modern ceiling fan with a dynamic design, featuring integrated LED lighting, perfect for lively and energetic living spaces.', 1, 1, 220.00, 'amped-ceiling-fan'),
+    ('Aviara', 'A sleek ceiling fan with thin blades, offering a minimalist style, ideal for elegant living rooms or bedrooms.', 1, 1, 240.00, 'aviara-ceiling-fan'),
+    ('Barlow', 'A classic ceiling fan with a powerful motor, combined with decorative lighting, perfect for traditional settings.', 1, 1, 210.00, 'barlow-ceiling-fan'),
+    ('Brawn', 'A robust industrial ceiling fan with a rugged design, suitable for garages or large open spaces.', 1, 1, 260.00, 'brawn-ceiling-fan'),
+    ('Edgewood', 'A versatile ceiling fan available in sizes from 44 to 72 inches, with various color options, fitting all interior styles.', 1, 1, 230.00, 'edgewood-ceiling-fan'),
+    ('Influencer', 'A unique ceiling fan with a distinctive design, incorporating smart technology for a modern and convenient experience.', 1, 1, 300.00, 'influencer-ceiling-fan'),
+    ('Islander', 'A tropical-inspired ceiling fan with natural wood blades, creating a relaxing beach-like ambiance.', 1, 1, 250.00, 'islander-ceiling-fan'),
+    ('Kerring', 'A minimalist ceiling fan with sharp lines, featuring LED lighting, ideal for offices or dining areas.', 1, 1, 225.00, 'kerring-ceiling-fan'),
+    ('Klear', 'A transparent ceiling fan with an innovative design, providing an airy and modern feel to any space.', 1, 1, 270.00, 'klear-ceiling-fan'),
+    ('Klinch', 'A compact ceiling fan with a high-performance motor, perfect for small rooms or children''s spaces.', 1, 1, 190.00, 'klinch-ceiling-fan'),
+    ('Klout', 'A powerful ceiling fan with an angular design, combined with lighting, suitable for commercial settings.', 1, 1, 280.00, 'klout-ceiling-fan'),
+    ('Kute', 'An elegant ceiling fan available in 44-52 inch sizes, offering a balance of style and efficiency.', 1, 1, 210.00, 'kute-ceiling-fan'),
+    ('Kwartet', 'A unique four-blade ceiling fan with integrated LED lighting, ideal for artistic spaces or large living rooms.', 1, 1, 260.00, 'kwartet-ceiling-fan');
 
 INSERT INTO product_details (product_id, size, material, motor_type, blade_count, light_kit_included, remote_control, airflow_cfm, power_consumption, warranty_years, additional_info)
 VALUES
