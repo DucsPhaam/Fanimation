@@ -14,6 +14,7 @@ if (!function_exists('getProducts')) {
                     p.name AS product_name, 
                     p.description, 
                     p.price AS product_price, 
+                    p.slug AS product_slug,
                     p.category_id, 
                     p.brand_id, 
                     p.created_at,
@@ -26,13 +27,13 @@ if (!function_exists('getProducts')) {
                     ) AS product_image,
                     GROUP_CONCAT(DISTINCT c.hex_code) AS color_hex_codes,
                     MAX(pv.stock) AS total_stock,
-                    AVG(f.rating) AS average_rating
+                    COALESCE(AVG(f.rating), 0) AS average_rating
                 FROM products p
                 LEFT JOIN product_variants pv ON p.id = pv.product_id
                 LEFT JOIN colors c ON pv.color_id = c.id
                 LEFT JOIN categories cat ON p.category_id = cat.id
                 LEFT JOIN brands b ON p.brand_id = b.id
-                LEFT JOIN feedbacks f ON p.id = f.product_id
+                LEFT JOIN feedbacks f ON p.id = f.product_id AND f.status = 'approved'
                 WHERE 1=1";
 
         $count_query = "SELECT COUNT(DISTINCT p.id) AS total 
@@ -41,7 +42,7 @@ if (!function_exists('getProducts')) {
                         LEFT JOIN colors c ON pv.color_id = c.id
                         LEFT JOIN categories cat ON p.category_id = cat.id
                         LEFT JOIN brands b ON p.brand_id = b.id
-                        LEFT JOIN feedbacks f ON p.id = f.product_id
+                        LEFT JOIN feedbacks f ON p.id = f.product_id AND f.status = 'approved'
                         WHERE 1=1";
 
         $params = [];
@@ -145,10 +146,10 @@ if (!function_exists('getProducts')) {
     }
 }
 
-if (!function_exists('getProductById')) {
-    function getProductById($conn, $product_id) {
+if (!function_exists('getProductBySlug')) {
+    function getProductBySlug($conn, $product_slug) {
         if (!$conn->ping()) {
-            error_log("Kết nối cơ sở dữ liệu đã bị đóng trong getProductById.");
+            error_log("Kết nối cơ sở dữ liệu đã bị đóng trong getProductBySlug.");
             return null;
         }
 
@@ -157,6 +158,7 @@ if (!function_exists('getProductById')) {
                     p.name AS product_name, 
                     p.description, 
                     p.price AS product_price, 
+                    p.slug AS product_slug,
                     p.category_id, 
                     p.brand_id, 
                     p.created_at,
@@ -176,16 +178,16 @@ if (!function_exists('getProductById')) {
                 LEFT JOIN categories cat ON p.category_id = cat.id
                 LEFT JOIN brands b ON p.brand_id = b.id
                 LEFT JOIN feedbacks f ON p.id = f.product_id
-                WHERE p.id = ?
+                WHERE p.slug = ?
                 GROUP BY p.id, p.name, p.description, p.price, p.category_id, p.brand_id, p.created_at, cat.name, b.name";
 
         $stmt = $conn->prepare($query);
         if ($stmt === false) {
-            error_log("Lỗi chuẩn bị truy vấn trong getProductById: " . $conn->error);
+            error_log("Lỗi chuẩn bị truy vấn trong getProductBySlug: " . $conn->error);
             return null;
         }
 
-        $stmt->bind_param('i', $product_id);
+        $stmt->bind_param('s', $product_slug);
         $stmt->execute();
         $result = $stmt->get_result();
         $product = $result->fetch_assoc();

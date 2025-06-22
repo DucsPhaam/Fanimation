@@ -27,7 +27,7 @@ $search = isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '';
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/Fanimation/assets/fonts/font.php'; ?>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark header-includes">
         <div class="container-fluid">
             <div class="logo-container">
                 <a href="<?php echo htmlspecialchars($index_url); ?>" class="logo-container">
@@ -43,7 +43,6 @@ $search = isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '';
             <div class="collapse navbar-collapse" id="main_nav">
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item active fs-4"><a class="nav-link" href="<?php echo htmlspecialchars($index_url); ?>">Home</a></li>
-                    <li class="nav-item fs-4"><a class="nav-link" href="#">About</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link fs-4" href="<?php echo htmlspecialchars($help_center_url); ?>">Help Center</a>
                         <a class="nav-link dropdown-toggle fs-4 d-inline-block" href="#" data-bs-toggle="dropdown" aria-expanded="false"></a>
@@ -70,7 +69,6 @@ $search = isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '';
             <div class="collapse navbar-collapse" id="main_nav">
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item active fs-4"><a class="nav-link" href="<?php echo htmlspecialchars($index_url); ?>">Home</a></li>
-                    <li class="nav-item fs-4"><a class="nav-link" href="#">About</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link fs-4" href="<?php echo htmlspecialchars($help_center_url); ?>">Help Center</a>
                         <a class="nav-link dropdown-toggle fs-4 d-inline-block" href="#" data-bs-toggle="dropdown" aria-expanded="false"></a>
@@ -93,47 +91,56 @@ $search = isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '';
                 </ul>
             </div>
             <?php } ?>
-            <div class="nav-search">
-                <form method="GET" action="<?php echo htmlspecialchars($search_result_url); ?>" class="d-flex align-items-center mb-1">
-                    <input class="form-control form-control-sm w-24 me-1 mt-2" name="search" type="text" value="<?php echo htmlspecialchars($search); ?>" placeholder="Tìm kiếm sản phẩm" aria-label="Tìm kiếm">
+            <!-- container-fluid.// -->
+           <div class="nav-search">
+                <form method="GET" action="<?php echo $search_result_url; ?>" class="d-flex align-items-center mb-1">
+                    <input class="form-control form-control-sm w-24 me-1 mt-2" name="search" type="text" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search for products" aria-label="Tìm kiếm">
                     <button type="submit" class="btn btn-outline-secondary bg-white btn-sm mt-2">
                         <i class="bi bi-search"></i>
                     </button>
                 </form>
             </div>
+            <!-- giỏ hàng -->
             <div class="search-container position-relative d-inline-block me-3">
-                <a href="<?php echo htmlspecialchars($cart_url); ?>" class="position-relative">
+                <a href="<?php echo $cart_url; ?>" class="position-relative">
                     <i class="bi bi-cart3"></i>
                 </a>
             </div>
+
+            <!-- profile -->
             <div class="user-dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" data-bs-toggle="dropdown" aria-label="Menu người dùng">
-                    <i class="bi bi-person-circle"></i>
-                </a>
-                <?php if (!isset($_SESSION["user_id"])) { ?>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                    <li><a class="dropdown-item" href="<?php echo htmlspecialchars($login_url); ?>">Đăng nhập</a></li>
-                    <li><a class="dropdown-item" href="<?php echo htmlspecialchars($register_url); ?>">Đăng ký</a></li>
-                    <li><a class="dropdown-item" href="<?php echo htmlspecialchars($my_order_url); ?>">Đơn hàng của tôi</a></li>
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="../" data-bs-toggle="dropdown" aria-label="User menu">
+                            <i class="bi bi-person-circle"></i>
+                        </a>
+                        <?php 
+                        if(!isset($_SESSION["user_id"])){
+                        ?>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="<?php echo $login_url; ?>">Log In</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $register_url; ?>">Register</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $my_order_url; ?>">My Order</a></li>
+                        </ul>
+                        <?php }else{?>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="<?php echo $logout_url; ?>">Log Out</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $profile_url; ?>">Profile Information</a></li>
+                            <li><a class="dropdown-item" href="<?php echo $my_order_url; ?>">My Order</a></li>
+                        </ul>
+                        <?php }?>
+                    </li>
                 </ul>
-                <?php } else { ?>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                    <li><a class="dropdown-item" href="<?php echo htmlspecialchars($logout_url); ?>">Đăng xuất</a></li>
-                    <li><a class="dropdown-item" href="<?php echo htmlspecialchars($profile_url); ?>">Thông tin cá nhân</a></li>
-                    <li><a class="dropdown-item" href="<?php echo htmlspecialchars($my_order_url); ?>">Đơn hàng của tôi</a></li>
-                </ul>
-                <?php } ?>
             </div>
         </div>
     </nav>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
-        // Khởi tạo thủ công các dropdown của Bootstrap để tránh xung đột
-        document.addEventListener('DOMContentLoaded', function() {
-            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-            dropdownElementList.forEach(function(dropdownToggleEl) {
-                new bootstrap.Dropdown(dropdownToggleEl);
-            });
+    document.addEventListener('DOMContentLoaded', function () {
+        var dropdownElements = document.querySelectorAll('.dropdown-toggle');
+        dropdownElements.forEach(function (dropdownToggleEl) {
+        new bootstrap.Dropdown(dropdownToggleEl);
         });
+    });
     </script>
