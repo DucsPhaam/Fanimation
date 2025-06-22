@@ -146,6 +146,56 @@ if (!function_exists('getProducts')) {
     }
 }
 
+if (!function_exists('getProductById')) {
+    function getProductById($conn, $product_id) {
+        if (!$conn->ping()) {
+            error_log("Kết nối cơ sở dữ liệu đã bị đóng trong getProductById.");
+            return null;
+        }
+
+        $query = "SELECT 
+                    p.id AS product_id, 
+                    p.name AS product_name, 
+                    p.description, 
+                    p.price AS product_price, 
+                    p.category_id, 
+                    p.brand_id, 
+                    p.created_at,
+                    cat.name AS category_name,
+                    b.name AS brand_name,
+                    COALESCE(
+                        (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id AND pi.u_primary = 1 LIMIT 1),
+                        (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id LIMIT 1),
+                        '/Fanimation/assets/images/products/default.jpg'
+                    ) AS product_image,
+                    GROUP_CONCAT(DISTINCT c.hex_code) AS color_hex_codes,
+                    MAX(pv.stock) AS total_stock,
+                    AVG(f.rating) AS average_rating
+                FROM products p
+                LEFT JOIN product_variants pv ON p.id = pv.product_id
+                LEFT JOIN colors c ON pv.color_id = c.id
+                LEFT JOIN categories cat ON p.category_id = cat.id
+                LEFT JOIN brands b ON p.brand_id = b.id
+                LEFT JOIN feedbacks f ON p.id = f.product_id
+                WHERE p.id = ?
+                GROUP BY p.id, p.name, p.description, p.price, p.category_id, p.brand_id, p.created_at, cat.name, b.name";
+
+        $stmt = $conn->prepare($query);
+        if ($stmt === false) {
+            error_log("Lỗi chuẩn bị truy vấn trong getProductById: " . $conn->error);
+            return null;
+        }
+
+        $stmt->bind_param('i', $product_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $product = $result->fetch_assoc();
+        $stmt->close();
+
+        return $product;
+    }
+}
+
 if (!function_exists('getProductBySlug')) {
     function getProductBySlug($conn, $product_slug) {
         if (!$conn->ping()) {
