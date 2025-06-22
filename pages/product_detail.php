@@ -94,6 +94,9 @@ if (!$product) {
     exit;
 }
 
+// Lấy thông tin chi tiết sản phẩm từ bảng product_details
+$product_details = getProductDetailsById($conn, $product_id);
+
 // Lấy hình ảnh và tồn kho theo màu
 $images = [];
 $stocks_by_color = [];
@@ -206,6 +209,70 @@ if ($stmt === false) {
     .star-rating input:checked+label {
         color: #ffc107;
     }
+
+    .nav-links {
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        align-items: center; /* Center links vertically */
+        justify-content: center; /* Center links horizontally */
+    }
+
+    .nav-links a {
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+        padding-bottom: 5px;
+        transition: color 0.3s, border-bottom 0.3s;
+        cursor: pointer;
+    }
+
+    .nav-links a:hover {
+        color: #ff0000;
+        border-bottom: 2px solid #ff0000;
+    }
+
+    .nav-links a.active {
+        color: #ff0000;
+        border-bottom: 2px solid #ff0000;
+    }
+
+    #details-section {
+        width: 100%; 
+        margin: 0 auto; /* Center horizontally */
+        transition: opacity 0.3s ease, height 0.3s ease;
+        padding: 50px 0 50px 0;
+    }
+
+    #details-section table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+    }
+
+    #details-section th,
+    #details-section td {
+        padding: 0.75rem;
+        border: 1px solid #dee2e6;
+        text-align: left;
+    }
+
+    #details-section th {
+        font-weight: bold;
+        background-color: #f8f9fa;
+    }
+
+    #feedback-section {
+        transition: opacity 0.3s ease, height 0.3s ease;
+    }
+
+    .hidden {
+        display: none;
+        opacity: 0;
+        height: 0;
+        overflow: hidden;
+    }
 </style>
 
 <div class="w-90 mx-auto">
@@ -302,7 +369,7 @@ if ($stmt === false) {
 
                 <p><strong>Giá:</strong></p>
                 <div class="fs-1 fw-bold text-danger">
-                    <?php echo number_format($product['product_price'], 0, '', '.'); ?>₫
+                    <?php echo number_format($product['product_price'], 0, ',', '.'); ?>₫
                 </div>
 
                 <button class="btn btn-danger add-to-cart"
@@ -311,66 +378,175 @@ if ($stmt === false) {
                 </button>
             </div>
         </div>
+
+        <!-- Liên kết Đánh giá sản phẩm và Chi tiết sản phẩm -->
+        <div class="nav-links">
+            <a class="tab-link active" data-target="feedback-section">Đánh giá sản phẩm</a>
+            <a class="tab-link" data-target="details-section">Chi tiết sản phẩm</a>
+        </div>
+
+        <!-- Phần Chi tiết sản phẩm -->
+        <div id="details-section" class="mt-8 hidden">
+            <h2 class="text-2xl font-semibold mb-4">Chi tiết sản phẩm</h2>
+            <?php if ($product_details): ?>
+                <table>
+                    <?php if ($product_details['size']): ?>
+                        <tr>
+                            <th>Kích thước</th>
+                            <td><?php echo htmlspecialchars($product_details['size']); ?></td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php if ($product_details['material']): ?>
+                        <tr>
+                            <th>Chất liệu</th>
+                            <td><?php echo htmlspecialchars($product_details['material']); ?></td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php if ($product_details['motor_type']): ?>
+                        <tr>
+                            <th>Loại động cơ</th>
+                            <td><?php echo htmlspecialchars($product_details['motor_type']); ?></td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php if (isset($product_details['blade_count'])): ?>
+                        <tr>
+                            <th>Số cánh quạt</th>
+                            <td><?php echo $product_details['blade_count']; ?></td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php if (isset($product_details['light_kit_included'])): ?>
+                        <tr>
+                            <th>Bộ đèn</th>
+                            <td><?php echo $product_details['light_kit_included'] ? 'Có' : 'Không'; ?></td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php if (isset($product_details['remote_control'])): ?>
+                        <tr>
+                            <th>Điều khiển từ xa</th>
+                            <td><?php echo $product_details['remote_control'] ? 'Có' : 'Không'; ?></td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php if ($product_details['airflow_cfm']): ?>
+                        <tr>
+                            <th>Lưu lượng gió</th>
+                            <td><?php echo $product_details['airflow_cfm']; ?> CFM</td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php if ($product_details['power_consumption']): ?>
+                        <tr>
+                            <th>Công suất tiêu thụ</th>
+                            <td><?php echo $product_details['power_consumption']; ?> Watt</td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php if ($product_details['warranty_years']): ?>
+                        <tr>
+                            <th>Bảo hành</th>
+                            <td><?php echo $product_details['warranty_years']; ?> năm</td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php if ($product_details['additional_info']): ?>
+                        <tr>
+                            <th>Thông tin bổ sung</th>
+                            <td><?php echo htmlspecialchars($product_details['additional_info']); ?></td>
+                        </tr>
+                    <?php endif; ?>
+                </table>
+            <?php else: ?>
+                <p>Chưa có thông tin chi tiết cho sản phẩm này.</p>
+            <?php endif; ?>
+        </div>
+
+        <!-- Phần Đánh giá sản phẩm -->
+        <div id="feedback-section" class="mt-8">
+            <h2 class="text-2xl font-semibold mb-4">Đánh giá sản phẩm</h2>
+            <?php if (!empty($success)): ?>
+                <p class='text-green-500 mb-4'><?php echo htmlspecialchars($success); ?></p>
+            <?php endif; ?>
+            <?php if (!empty($error)): ?>
+                <p class='text-red-500 mb-4'><?php echo htmlspecialchars($error); ?></p>
+            <?php endif; ?>
+            <?php if (isset($feedback_error)): ?>
+                <?php echo $feedback_error; ?>
+            <?php endif; ?>
+            <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] > 0): ?>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="rating" class="form-label">Số Sao</label>
+                        <div class="star-rating">
+                            <?php for ($i = 5; $i >= 1; $i--): ?>
+                                <input type="radio" name="rating" id="star<?php echo $i; ?>" value="<?php echo $i; ?>" required>
+                                <label for="star<?php echo $i; ?>" class="star"><i class="bi bi-star-fill"></i></label>
+                            <?php endfor; ?>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Bình Luận</label>
+                        <textarea name="message" class="form-control" rows="4" maxlength="1000" required></textarea>
+                    </div>
+                    <button type="submit" name="submit_feedback" class="btn btn-danger">Gửi Đánh Giá</button>
+                </form>
+            <?php else: ?>
+                <p>Vui lòng <a href="<?php echo htmlspecialchars($login_url); ?>" class="text-blue-500">đăng nhập</a> để gửi đánh giá!</p>
+            <?php endif; ?>
+
+            <div class="mt-6">
+                <?php if (empty($feedbacks)): ?>
+                    <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+                <?php else: ?>
+                    <?php foreach ($feedbacks as $feedback): ?>
+                        <div class="border-b py-4">
+                            <p><strong><?php echo htmlspecialchars($feedback['name'] ?? 'Ẩn danh'); ?></strong> -
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <i class="bi bi-star-fill <?php echo $i <= $feedback['rating'] ? 'text-warning' : 'text-secondary'; ?>"></i>
+                                <?php endfor; ?>
+                            </p>
+                            <p><?php echo htmlspecialchars($feedback['message']); ?></p>
+                            <p class="text-gray-500 text-sm"><?php echo htmlspecialchars($feedback['created_at']); ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
     <?php else: ?>
         <div class="alert alert-danger">Sản phẩm không tồn tại hoặc đã hết hàng.</div>
     <?php endif; ?>
-</div>
-
-<div class="mt-8 w-75 mx-auto">
-    <h2 class="text-2xl font-semibold mb-4">Đánh Giá Sản Phẩm</h2>
-    <?php if (!empty($success)): ?>
-        <p class='text-green-500 mb-4'><?php echo htmlspecialchars($success); ?></p>
-    <?php endif; ?>
-    <?php if (!empty($error)): ?>
-        <p class='text-red-500 mb-4'><?php echo htmlspecialchars($error); ?></p>
-    <?php endif; ?>
-    <?php if (isset($feedback_error)): ?>
-        <?php echo $feedback_error; ?>
-    <?php endif; ?>
-    <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] > 0): ?>
-        <form method="POST">
-            <div class="mb-3">
-                <label for="rating" class="form-label">Số Sao</label>
-                <div class="star-rating">
-                    <?php for ($i = 5; $i >= 1; $i--): ?>
-                        <input type="radio" name="rating" id="star<?php echo $i; ?>" value="<?php echo $i; ?>" required>
-                        <label for="star<?php echo $i; ?>" class="star"><i class="bi bi-star-fill"></i></label>
-                    <?php endfor; ?>
-                </div>
-            </div>
-            <div class="mb-3">
-                <label for="message" class="form-label">Bình Luận</label>
-                <textarea name="message" class="form-control" rows="4" required></textarea>
-            </div>
-            <button type="submit" name="submit_feedback" class="btn btn-danger">Gửi Đánh Giá</button>
-        </form>
-    <?php else: ?>
-        <p>Vui lòng <a href="<?php echo $login_url;?>" class="text-blue-500">đăng nhập</a> để gửi đánh giá!</p>
-    <?php endif; ?>
-
-    <div class="mt-6">
-        <?php if (empty($feedbacks)): ?>
-            <p>Chưa có đánh giá nào cho sản phẩm này.</p>
-        <?php else: ?>
-            <?php foreach ($feedbacks as $feedback): ?>
-                <div class="border-b py-4">
-                    <p><strong><?php echo htmlspecialchars($feedback['name'] ?? 'Ẩn danh'); ?></strong> -
-                        <?php for ($i = 1; $i <= 5; $i++): ?>
-                            <i class="bi bi-star-fill <?php echo $i <= $feedback['rating'] ? 'text-warning' : 'text-secondary'; ?>"></i>
-                        <?php endfor; ?>
-                    </p>
-                    <p><?php echo htmlspecialchars($feedback['message']); ?></p>
-                    <p class="text-gray-500 text-sm"><?php echo htmlspecialchars($feedback['created_at']); ?></p>
-                </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const feedbackSection = document.getElementById('feedback-section');
+    const detailsSection = document.getElementById('details-section');
+
+    document.querySelectorAll('.tab-link').forEach(link => {
+        link.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+
+            // Cập nhật trạng thái active cho tab
+            document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+
+            // Hiển thị/xấu nội dung
+            if (targetId === 'feedback-section') {
+                feedbackSection.classList.remove('hidden');
+                detailsSection.classList.add('hidden');
+            } else if (targetId === 'details-section') {
+                detailsSection.classList.remove('hidden');
+                feedbackSection.classList.add('hidden');
+            }
+
+            // Cuộn mượt đến phần nội dung
+            const targetElement = document.getElementById(targetId);
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 50,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
     const carousel = document.querySelector('#productCarousel');
     const mainImage = document.getElementById('main-image-<?php echo $product['product_id'] ?? 0; ?>');
     const defaultImage = mainImage ? mainImage.getAttribute('data-default-image') : '';
@@ -458,7 +634,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 productId,
                 colorId: selectedColorId,
                 quantity,
-                sessionId: '<?php echo $_SESSION['guest_session_id']; ?>'
+                sessionId: '<?php echo htmlspecialchars($_SESSION['guest_session_id']); ?>'
             });
 
             fetch('/Fanimation/pages/cart/add_to_cart.php', {
@@ -466,7 +642,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `action=add&product_id=${productId}&color_id=${selectedColorId}&quantity=${quantity}&session_id=<?php echo $_SESSION['guest_session_id']; ?>`
+                body: `action=add&product_id=${productId}&color_id=${selectedColorId}&quantity=${quantity}&session_id=<?php echo htmlspecialchars($_SESSION['guest_session_id']); ?>`
             })
             .then(response => {
                 console.log('Response status:', response.status, 'URL:', response.url);
