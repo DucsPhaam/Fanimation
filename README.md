@@ -41,17 +41,21 @@ I.Admin Features
 - Manage Products: View and edit products via pages/admin/products.php.
 - User Management: Add, edit, or delete users through pages/admin/users.php.
 - Order Management: Handle orders and update statuses via pages/admin/orders.php.
+
 II.User Features
 - Registration/Login: Register or log in via pages/user/register.php and pages/user/login.php.
 - Shopping: Add items to cart (pages/cart/add_to_cart.php), view cart (pages/cart/cart.php), and checkout (pages/cart/checkout.php)
 - Profile: Manage profile details via pages/user/profile.php.
+
 III.Configuration
 - Edit includes/config.php to set the base URL and database connection details.
 - Adjust .htaccess for URL rewriting if needed (e.g., remove index.php from URLs).
+
 IV.Troubleshooting
 - Errors Adding Products: Check server logs (/var/log/php_errors.log) for details. Ensure images are under 5MB and in supported formats (jpg, jpeg, png, gif).
 - Database Issues: Verify foreign key constraints and data integrity in categories, brands, and colors tables.
 - CSS/JS Not Loading: Confirm internet access for CDN resources (e.g., Bootstrap, Font Awesome) or host them locally.
+
 V.Contributing
 1.Fork the repository.
 2.Create a feature branch (git checkout -b feature-name).
