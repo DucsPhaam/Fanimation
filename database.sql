@@ -163,7 +163,7 @@ CREATE TABLE contacts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
-    user_id INT NOT NULL,
+    user_id INT,
     phone varchar(20),
 	address text,
 	product_name varchar(100),
@@ -321,94 +321,94 @@ VALUES
     
 
 -- Amped (id = 1)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(1,2, '../assets/images/products/amped_1.jpg', 1),
-(1,7, '../assets/images/products/amped_2.jpg', 0),
-(1,3, '../assets/images/products/amped_3.jpg', 0),
-(1,1, '../assets/images/products/amped_4.jpg', 0),
-(1, 7,'../assets/images/products/amped_5.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(1, 2, '/Fanimation/assets/images/products/amped_1.jpg', 1),
+(1, 7, '/Fanimation/assets/images/products/amped_2.jpg', 0),
+(1, 3, '/Fanimation/assets/images/products/amped_3.jpg', 0),
+(1, 1, '/Fanimation/assets/images/products/amped_4.jpg', 0),
+(1, 7, '/Fanimation/assets/images/products/amped_5.jpg', 0);
 
 -- Aviara (id = 2)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(2,6, '../assets/images/products/aviara_1.jpg', 1),
-(2,6, '../assets/images/products/aviara_2.jpg', 0),
-(2,6, '../assets/images/products/aviara_3.jpg', 0),
-(2, 7,'../assets/images/products/aviara_4.jpg', 0),
-(2, 1,'../assets/images/products/aviara_5.jpg', 0),
-(2,2, '../assets/images/products/aviara_6.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(2, 6, '/Fanimation/assets/images/products/aviara_1.jpg', 1),
+(2, 6, '/Fanimation/assets/images/products/aviara_2.jpg', 0),
+(2, 6, '/Fanimation/assets/images/products/aviara_3.jpg', 0),
+(2, 7, '/Fanimation/assets/images/products/aviara_4.jpg', 0),
+(2, 1, '/Fanimation/assets/images/products/aviara_5.jpg', 0),
+(2, 2, '/Fanimation/assets/images/products/aviara_6.jpg', 0);
 
 -- Barlow (id = 3)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(3, 5,'../assets/images/products/barlow_1.jpg', 1),
-(3,2, '../assets/images/products/barlow_2.jpg', 0),
-(3, 3,'../assets/images/products/barlow_3.jpg', 0),
-(3,7, '../assets/images/products/barlow_4.jpg', 0),
-(3, 7,'../assets/images/products/barlow_5.jpg', 0),
-(3,1, '../assets/images/products/barlow_6.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(3, 5, '/Fanimation/assets/images/products/barlow_1.jpg', 1),
+(3, 2, '/Fanimation/assets/images/products/barlow_2.jpg', 0),
+(3, 3, '/Fanimation/assets/images/products/barlow_3.jpg', 0),
+(3, 7, '/Fanimation/assets/images/products/barlow_4.jpg', 0),
+(3, 7, '/Fanimation/assets/images/products/barlow_5.jpg', 0),
+(3, 1, '/Fanimation/assets/images/products/barlow_6.jpg', 0);
 
 -- Brawn (id = 4)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(4, 7,'../assets/images/products/brawn_1.jpg', 1),
-(4, 2,'../assets/images/products/brawn_2.jpg', 0),
-(4, 1,'../assets/images/products/brawn_3.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(4, 7, '/Fanimation/assets/images/products/brawn_1.jpg', 1),
+(4, 2, '/Fanimation/assets/images/products/brawn_2.jpg', 0),
+(4, 1, '/Fanimation/assets/images/products/brawn_3.jpg', 0);
 
 -- Edgewood (id = 5)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(5,2, '../assets/images/products/edgewood_1.jpg', 1),
-(5,2, '../assets/images/products/edgewood_2.jpg', 0),
-(5,2, '../assets/images/products/edgewood_3.jpg', 0),
-(5, 1,'../assets/images/products/edgewood_4.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(5, 2, '/Fanimation/assets/images/products/edgewood_1.jpg', 1),
+(5, 2, '/Fanimation/assets/images/products/edgewood_2.jpg', 0),
+(5, 2, '/Fanimation/assets/images/products/edgewood_3.jpg', 0),
+(5, 1, '/Fanimation/assets/images/products/edgewood_4.jpg', 0);
 
 -- Influencer (id = 6)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(6, 8,'../assets/images/products/influencer_1.jpg', 1),
-(6,1, '../assets/images/products/influencer_2.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(6, 8, '/Fanimation/assets/images/products/influencer_1.jpg', 1),
+(6, 1, '/Fanimation/assets/images/products/influencer_2.jpg', 0);
 
 -- Islander (id = 7)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(7,6, '../assets/images/products/islander_1.jpg', 1),
-(7,7, '../assets/images/products/islander_2.jpg', 0),
-(7, 4,'../assets/images/products/islander_3.jpg', 0),
-(7, 7,'../assets/images/products/islander_4.jpg', 0),
-(7,1, '../assets/images/products/islander_5.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(7, 6, '/Fanimation/assets/images/products/islander_1.jpg', 1),
+(7, 7, '/Fanimation/assets/images/products/islander_2.jpg', 0),
+(7, 4, '/Fanimation/assets/images/products/islander_3.jpg', 0),
+(7, 7, '/Fanimation/assets/images/products/islander_4.jpg', 0),
+(7, 1, '/Fanimation/assets/images/products/islander_5.jpg', 0);
 
 -- Kerring (id = 8)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(8, 7,'../assets/images/products/kerring_1.jpg', 1),
-(8, 1,'../assets/images/products/kerring_2.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(8, 7, '/Fanimation/assets/images/products/kerring_1.jpg', 1),
+(8, 1, '/Fanimation/assets/images/products/kerring_2.jpg', 0);
 
 -- Klear (id = 9)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(9,2, '../assets/images/products/klear_1.jpg', 1),
-(9, 7,'../assets/images/products/klear_2.jpg', 0),
-(9, 7,'../assets/images/products/klear_3.jpg', 0),
-(9, 1,'../assets/images/products/klear_4.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(9, 2, '/Fanimation/assets/images/products/klear_1.jpg', 1),
+(9, 7, '/Fanimation/assets/images/products/klear_2.jpg', 0),
+(9, 7, '/Fanimation/assets/images/products/klear_3.jpg', 0),
+(9, 1, '/Fanimation/assets/images/products/klear_4.jpg', 0);
 
 -- Klich (id = 10)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(10, 2,'../assets/images/products/klinch_1.jpg', 1),
-(10, 3,'../assets/images/products/klinch_2.jpg', 0),
-(10, 1,'../assets/images/products/klinch_3.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(10, 2, '/Fanimation/assets/images/products/klinch_1.jpg', 1),
+(10, 3, '/Fanimation/assets/images/products/klinch_2.jpg', 0),
+(10, 1, '/Fanimation/assets/images/products/klinch_3.jpg', 0);
 
 -- Klout (id = 11)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(11, 7,'../assets/images/products/klout_1.jpg', 1),
-(11, 1,'../assets/images/products/klout_2.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(11, 7, '/Fanimation/assets/images/products/klout_1.jpg', 1),
+(11, 1, '/Fanimation/assets/images/products/klout_2.jpg', 0);
 
 -- Kute (id = 12)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(12, 5,'../assets/images/products/kute_1.jpg', 1),
-(12,2, '../assets/images/products/kute_2.jpg', 0),
-(12, 3,'../assets/images/products/kute_3.jpg', 0),
-(12, 7,'../assets/images/products/kute_4.jpg', 0),
-(12, 2,'../assets/images/products/kute_5.jpg', 0),
-(12, 1,'../assets/images/products/kute_6.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(12, 5, '/Fanimation/assets/images/products/kute_1.jpg', 1),
+(12, 2, '/Fanimation/assets/images/products/kute_2.jpg', 0),
+(12, 3, '/Fanimation/assets/images/products/kute_3.jpg', 0),
+(12, 7, '/Fanimation/assets/images/products/kute_4.jpg', 0),
+(12, 2, '/Fanimation/assets/images/products/kute_5.jpg', 0),
+(12, 1, '/Fanimation/assets/images/products/kute_6.jpg', 0);
 
 -- Kwartet (id = 13)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(13,2, '../assets/images/products/kwartet_1.jpg', 1),
-(13, 3,'../assets/images/products/kwartet_2.jpg', 0),
-(13, 7,'../assets/images/products/kwartet_3.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(13, 2, '/Fanimation/assets/images/products/kwartet_1.jpg', 1),
+(13, 3, '/Fanimation/assets/images/products/kwartet_2.jpg', 0),
+(13, 7, '/Fanimation/assets/images/products/kwartet_3.jpg', 0);
 
 -- Insert sample orders
 INSERT INTO orders (user_id, status, created_at, fullname, email, phone_number, address, note, total_money, payment_status)
@@ -418,6 +418,7 @@ VALUES
     (2, 'processing', '2025-06-05 09:15:00', 'John Doe', 'john.doe@example.com', '0987654321', '456 Elm Street, Sample City', 'Include installation guide.', 720.75, 'pending'),
     (3, 'shipped', '2025-05-20 14:00:00', 'Jane Smith', 'jane.smith@example.com', '0912345678', '789 Oak Avenue, Test Town', 'Urgent delivery.', 250.00, 'completed'),
     (1, 'cancelled', '2025-05-15 11:45:00', 'Admin User', 'admin@example.com', '0123456789', '123 Admin Street, Admin City', 'Cancelled due to wrong item.', 180.25, 'pending');
+
 
 -- Insert into order_items
 INSERT INTO order_items (order_id, product_variant_id, quantity, price, total_money, payment_method)
