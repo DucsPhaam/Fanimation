@@ -125,10 +125,24 @@ $product_details = getProductDetailsById($conn, $product['product_id']);
 // Lấy hình ảnh và tồn kho theo màu
 $images = [];
 $stocks_by_color = [];
-$sql = "SELECT pv.color_id, c.hex_code, pi.image_url, pv.stock
+$sql = "SELECT DISTINCT pv.color_id, c.hex_code, 
+        COALESCE(
+            (SELECT pi.image_url 
+             FROM product_images pi 
+             WHERE pi.product_id = pv.product_id 
+             AND pi.color_id = pv.color_id 
+             AND pi.u_primary = 1 
+             LIMIT 1),
+            (SELECT pi.image_url 
+             FROM product_images pi 
+             WHERE pi.product_id = pv.product_id 
+             AND pi.color_id = pv.color_id 
+             LIMIT 1),
+            '/Fanimation/assets/images/products/default.jpg'
+        ) AS image_url, 
+        pv.stock
         FROM product_variants pv
         JOIN colors c ON pv.color_id = c.id
-        LEFT JOIN product_images pi ON pv.product_id = pi.product_id AND pv.color_id = pi.color_id
         WHERE pv.product_id = ?";
 $stmt = $conn->prepare($sql);
 if ($stmt === false) {
@@ -139,7 +153,7 @@ if ($stmt === false) {
         $result = $stmt->get_result();
         while ($row = $result->fetch_assoc()) {
             $images[] = [
-                'image_url' => $row['image_url'] ?: ($product['product_image'] ?? '/Fanimation/assets/images/products/default.jpg'),
+                'image_url' => $row['image_url'],
                 'color_id' => $row['color_id'],
                 'hex_code' => $row['hex_code']
             ];
