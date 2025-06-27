@@ -46,9 +46,28 @@ CREATE TABLE products (
     category_id INT,
     brand_id INT,
     price INT NOT NULL,
+    slug VARCHAR(255) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(id),
     FOREIGN KEY (brand_id) REFERENCES brands(id)
+)AUTO_INCREMENT = 1;
+
+-- Tạo bảng product_details
+CREATE TABLE product_details (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    size VARCHAR(100), -- Kích thước (ví dụ: "52 inches", "44 inches")
+    material VARCHAR(255), -- Chất liệu (ví dụ: "Wood", "Metal", "Plastic")
+    motor_type VARCHAR(100), -- Loại động cơ (ví dụ: "AC", "DC")
+    blade_count INT, -- Số lượng cánh quạt
+    light_kit_included TINYINT(1) DEFAULT 0, -- Có bao gồm bộ đèn không (0: Không, 1: Có)
+    remote_control TINYINT(1) DEFAULT 0, -- Có điều khiển từ xa không (0: Không, 1: Có)
+    airflow_cfm INT, -- Lưu lượng gió (Cubic Feet per Minute)
+    power_consumption INT, -- Công suất tiêu thụ (Watt)
+    warranty_years INT, -- Thời gian bảo hành (năm)
+    additional_info TEXT, -- Thông tin bổ sung
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 )AUTO_INCREMENT = 1;
 
 -- Tạo bảng product_variants
@@ -144,7 +163,7 @@ CREATE TABLE contacts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
-    user_id INT NOT NULL,
+    user_id INT,
     phone varchar(20),
 	address text,
 	product_name varchar(100),
@@ -211,36 +230,37 @@ VALUES
     ('Exhaust fans'),
     ('Accessories');
 
--- categories = 1 Ceiling fans
-INSERT INTO products (name, description, brand_id, category_id, price)
+INSERT INTO products (name, description, brand_id, category_id, price, slug)
 VALUES
-	('Amped', 'A modern ceiling fan with a dynamic design, featuring integrated LED lighting, perfect for lively and energetic living spaces.', 1, 1, 220.00),
-	('Aviara', 'A sleek ceiling fan with thin blades, offering a minimalist style, ideal for elegant living rooms or bedrooms.', 1, 1, 240.00),
-	('Barlow', 'A classic ceiling fan with a powerful motor, combined with decorative lighting, perfect for traditional settings.', 1, 1, 210.00),
-	('Brawn', 'A robust industrial ceiling fan with a rugged design, suitable for garages or large open spaces.', 1, 1, 260.00),
-	('Edgewood', 'A versatile ceiling fan available in sizes from 44 to 72 inches, with various color options, fitting all interior styles.', 1, 1, 230.00),
-	('Influencer', 'A unique ceiling fan with a distinctive design, incorporating smart technology for a modern and convenient experience.', 1, 1, 300.00),
-	('Islander', 'A tropical-inspired ceiling fan with natural wood blades, creating a relaxing beach-like ambiance.', 1, 1, 250.00),
-	('Kerring', 'A minimalist ceiling fan with sharp lines, featuring LED lighting, ideal for offices or dining areas.', 1, 1, 225.00),
-	('Klear', 'A transparent ceiling fan with an innovative design, providing an airy and modern feel to any space.', 1, 1, 270.00),
-	('Klinch', 'A compact ceiling fan with a high-performance motor, perfect for small rooms or children''s spaces.', 1, 1, 190.00),
-	('Klout', 'A powerful ceiling fan with an angular design, combined with lighting, suitable for commercial settings.', 1, 1, 280.00),
-	('Kute', 'An elegant ceiling fan available in 44-52 inch sizes, offering a balance of style and efficiency.', 1, 1, 210.00),
-	('Kwartet', 'A unique four-blade ceiling fan with integrated LED lighting, ideal for artistic spaces or large living rooms.', 1, 1, 260.00);
-    
+    ('Amped', 'A modern ceiling fan with a dynamic design, featuring integrated LED lighting, perfect for lively and energetic living spaces.', 1, 1, 220.00, 'amped-ceiling-fan'),
+    ('Aviara', 'A sleek ceiling fan with thin blades, offering a minimalist style, ideal for elegant living rooms or bedrooms.', 1, 1, 240.00, 'aviara-ceiling-fan'),
+    ('Barlow', 'A classic ceiling fan with a powerful motor, combined with decorative lighting, perfect for traditional settings.', 1, 1, 210.00, 'barlow-ceiling-fan'),
+    ('Brawn', 'A robust industrial ceiling fan with a rugged design, suitable for garages or large open spaces.', 1, 1, 260.00, 'brawn-ceiling-fan'),
+    ('Edgewood', 'A versatile ceiling fan available in sizes from 44 to 72 inches, with various color options, fitting all interior styles.', 1, 1, 230.00, 'edgewood-ceiling-fan'),
+    ('Influencer', 'A unique ceiling fan with a distinctive design, incorporating smart technology for a modern and convenient experience.', 1, 1, 300.00, 'influencer-ceiling-fan'),
+    ('Islander', 'A tropical-inspired ceiling fan with natural wood blades, creating a relaxing beach-like ambiance.', 1, 1, 250.00, 'islander-ceiling-fan'),
+    ('Kerring', 'A minimalist ceiling fan with sharp lines, featuring LED lighting, ideal for offices or dining areas.', 1, 1, 225.00, 'kerring-ceiling-fan'),
+    ('Klear', 'A transparent ceiling fan with an innovative design, providing an airy and modern feel to any space.', 1, 1, 270.00, 'klear-ceiling-fan'),
+    ('Klinch', 'A compact ceiling fan with a high-performance motor, perfect for small rooms or children''s spaces.', 1, 1, 190.00, 'klinch-ceiling-fan'),
+    ('Klout', 'A powerful ceiling fan with an angular design, combined with lighting, suitable for commercial settings.', 1, 1, 280.00, 'klout-ceiling-fan'),
+    ('Kute', 'An elegant ceiling fan available in 44-52 inch sizes, offering a balance of style and efficiency.', 1, 1, 210.00, 'kute-ceiling-fan'),
+    ('Kwartet', 'A unique four-blade ceiling fan with integrated LED lighting, ideal for artistic spaces or large living rooms.', 1, 1, 260.00, 'kwartet-ceiling-fan');
 
--- categories = 2 Pedestal fans
-INSERT INTO products (name, description, brand_id, category_id, price)
-VALUES 
-    ('Oscillapro', 'Premium cooling fan with advanced technology, lowers temperature by 15°C. Sleek, energy-efficient design, quiet, and mobile.', 1, 2, 500.00),
-    ('Hyperflow', 'High-performance fan, cools up to 18°C. Sleek, energy-efficient, quiet, and portable. Large water tank for extended cooling.', 1, 2, 300.00),
-    ('Airmax', 'Powerful industrial fan with high-velocity airflow, cooling up to 18°C. Durable, energy-efficient design, quiet operation, and portable. Ideal for warehouses and commercial spaces.', 1, 2, 250.00),
-    ('Dualfan', 'Dual-fan industrial cooling, up to 20°C. Durable, energy-efficient, quiet, portable. Ideal for large spaces.', 1, 2, 340,00),
-    ('Ecowind', 'Eco-friendly cooling, up to 15°C. Energy-efficient, quiet, portable. Perfect for homes and offices.', 1, 2, 350.00),
-    ('Towerbreeze', 'Sleek tower fan with powerful airflow, cooling up to 16°C. Energy-efficient, quiet, and features 70° oscillation. Ideal for home or office use.', 1, 2, 700.00),
-    ('Cyclone', 'High-velocity industrial fan, cooling up to 20°C. Durable, energy-efficient, quiet, with powerful airflow. Ideal for warehouses and commercial spaces.', 1, 2, 300.00),
-    ('Flexicool', 'Compact cooling fan with flexible airflow direction, cooling up to 15°C. Energy-efficient, quiet, and portable with adjustable settings. Ideal for homes and small offices.', 1, 2, 400.00),
-    ('Galemaster', 'High-powered industrial fan with intense airflow, cooling up to 22°C. Rugged, energy-efficient, quiet, and portable. Perfect for large-scale industrial and warehouse use.', 1, 2 ,500.00);
+INSERT INTO product_details (product_id, size, material, motor_type, blade_count, light_kit_included, remote_control, airflow_cfm, power_consumption, warranty_years, additional_info)
+VALUES
+    (1, '52 inches', 'Metal, ABS Plastic', 'DC', 3, 1, 1, 5500, 35, 5, 'Integrated LED light, smart control compatible'), -- Amped
+    (2, '44 inches', 'Wood, Metal', 'AC', 5, 0, 1, 4500, 60, 3, 'Minimalist design for modern interiors'), -- Aviara
+    (3, '60 inches', 'Wood', 'AC', 5, 1, 0, 6000, 70, 5, 'Classic design with decorative lighting'), -- Barlow
+    (4, '72 inches', 'Metal', 'DC', 6, 0, 1, 8000, 50, 7, 'Industrial-grade for large spaces'), -- Brawn
+    (5, '52 inches', 'Wood, Metal', 'DC', 5, 0, 1, 5200, 40, 5, 'Versatile size options for all interiors'), -- Edgewood
+    (6, '56 inches', 'ABS Plastic, Metal', 'DC', 4, 1, 1, 5800, 45, 5, 'Smart technology integration'), -- Influencer
+    (7, '60 inches', 'Natural Wood', 'AC', 5, 0, 1, 6200, 65, 3, 'Tropical-inspired design'), -- Islander
+    (8, '48 inches', 'Metal', 'DC', 3, 1, 1, 5000, 38, 5, 'Sharp lines, ideal for offices'), -- Kerring
+    (9, '52 inches', 'Transparent ABS', 'DC', 4, 0, 1, 5400, 42, 5, 'Innovative transparent blade design'), -- Klear
+    (10, '36 inches', 'Metal, ABS Plastic', 'DC', 3, 0, 1, 4000, 30, 3, 'Compact for small rooms'), -- Klinch
+    (11, '60 inches', 'Metal', 'DC', 5, 1, 1, 6500, 55, 5, 'Angular design for commercial spaces'), -- Klout
+    (12, '48 inches', 'Wood, Metal', 'DC', 4, 0, 1, 4800, 35, 5, 'Elegant and efficient'), -- Kute
+    (13, '56 inches', 'Metal, Wood', 'DC', 4, 1, 1, 5700, 40, 5, 'Unique four-blade design with LED'); -- Kwartet
 
 INSERT INTO colors (name, hex_code)
 VALUES 
@@ -251,10 +271,7 @@ VALUES
     ('Matte Greige', '#D6D1C4'),
     ('Driftwood', '#A39E9E'),
     ('Brushed Satin Brass', '#D4AF37'),
-    ('Galvanized', '#BDC3C7'),
-    ('GreyBlue', '#646492'),
-    ('Grey', '#808080'),
-    ('Blue', '#0A32A0');
+    ('Galvanized', '#BDC3C7');
     
 INSERT INTO product_variants (product_id, color_id, stock)
 VALUES
@@ -301,119 +318,97 @@ VALUES
     (13, 3, 5),
     (13, 7, 5);
     
-
--- Pedestal fans
-INSERT INTO product_variants (product_id, color_id, stock)
-VALUES
-    (14, 1, 5),
-    (14, 2, 5),
-    (15, 4, 5),
-    (15, 3, 5),
-    (15, 7, 5),
-    (16, 1, 5),
-    (16, 2, 5),
-    (17, 9, 5),
-    (17, 10, 5),
-    (18, 1, 5),
-    (18, 2, 5),
-    (19, 10, 5),
-    (19, 11, 5),
-    (20, 4, 5),
-    (20, 11, 5),
-    (21, 4, 5),
-    (21, 10, 5),
-    (22, 11, 5),
-    (22, 11, 5);
+    
 
 -- Amped (id = 1)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(1,2, '../assets/images/products/amped_1.jpg', 1),
-(1,7, '../assets/images/products/amped_2.jpg', 0),
-(1,3, '../assets/images/products/amped_3.jpg', 0),
-(1,1, '../assets/images/products/amped_4.jpg', 0),
-(1, 7,'../assets/images/products/amped_5.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(1, 2, '/Fanimation/assets/images/products/amped_1.jpg', 1),
+(1, 7, '/Fanimation/assets/images/products/amped_2.jpg', 0),
+(1, 3, '/Fanimation/assets/images/products/amped_3.jpg', 0),
+(1, 1, '/Fanimation/assets/images/products/amped_4.jpg', 0),
+(1, 7, '/Fanimation/assets/images/products/amped_5.jpg', 0);
 
 -- Aviara (id = 2)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(2,6, '../assets/images/products/aviara_1.jpg', 1),
-(2,6, '../assets/images/products/aviara_2.jpg', 0),
-(2,6, '../assets/images/products/aviara_3.jpg', 0),
-(2, 7,'../assets/images/products/aviara_4.jpg', 0),
-(2, 1,'../assets/images/products/aviara_5.jpg', 0),
-(2,2, '../assets/images/products/aviara_6.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(2, 6, '/Fanimation/assets/images/products/aviara_1.jpg', 1),
+(2, 6, '/Fanimation/assets/images/products/aviara_2.jpg', 0),
+(2, 6, '/Fanimation/assets/images/products/aviara_3.jpg', 0),
+(2, 7, '/Fanimation/assets/images/products/aviara_4.jpg', 0),
+(2, 1, '/Fanimation/assets/images/products/aviara_5.jpg', 0),
+(2, 2, '/Fanimation/assets/images/products/aviara_6.jpg', 0);
 
 -- Barlow (id = 3)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(3, 5,'../assets/images/products/barlow_1.jpg', 1),
-(3,2, '../assets/images/products/barlow_2.jpg', 0),
-(3, 3,'../assets/images/products/barlow_3.jpg', 0),
-(3,7, '../assets/images/products/barlow_4.jpg', 0),
-(3, 7,'../assets/images/products/barlow_5.jpg', 0),
-(3,1, '../assets/images/products/barlow_6.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(3, 5, '/Fanimation/assets/images/products/barlow_1.jpg', 1),
+(3, 2, '/Fanimation/assets/images/products/barlow_2.jpg', 0),
+(3, 3, '/Fanimation/assets/images/products/barlow_3.jpg', 0),
+(3, 7, '/Fanimation/assets/images/products/barlow_4.jpg', 0),
+(3, 7, '/Fanimation/assets/images/products/barlow_5.jpg', 0),
+(3, 1, '/Fanimation/assets/images/products/barlow_6.jpg', 0);
 
 -- Brawn (id = 4)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(4, 7,'../assets/images/products/brawn_1.jpg', 1),
-(4, 2,'../assets/images/products/brawn_2.jpg', 0),
-(4, 1,'../assets/images/products/brawn_3.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(4, 7, '/Fanimation/assets/images/products/brawn_1.jpg', 1),
+(4, 2, '/Fanimation/assets/images/products/brawn_2.jpg', 0),
+(4, 1, '/Fanimation/assets/images/products/brawn_3.jpg', 0);
 
 -- Edgewood (id = 5)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(5,2, '../assets/images/products/edgewood_1.jpg', 1),
-(5,2, '../assets/images/products/edgewood_2.jpg', 0),
-(5,2, '../assets/images/products/edgewood_3.jpg', 0),
-(5, 1,'../assets/images/products/edgewood_4.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(5, 2, '/Fanimation/assets/images/products/edgewood_1.jpg', 1),
+(5, 2, '/Fanimation/assets/images/products/edgewood_2.jpg', 0),
+(5, 2, '/Fanimation/assets/images/products/edgewood_3.jpg', 0),
+(5, 1, '/Fanimation/assets/images/products/edgewood_4.jpg', 0);
 
 -- Influencer (id = 6)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(6, 8,'../assets/images/products/influencer_1.jpg', 1),
-(6,1, '../assets/images/products/influencer_2.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(6, 8, '/Fanimation/assets/images/products/influencer_1.jpg', 1),
+(6, 1, '/Fanimation/assets/images/products/influencer_2.jpg', 0);
 
 -- Islander (id = 7)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(7,6, '../assets/images/products/islander_1.jpg', 1),
-(7,7, '../assets/images/products/islander_2.jpg', 0),
-(7, 4,'../assets/images/products/islander_3.jpg', 0),
-(7, 7,'../assets/images/products/islander_4.jpg', 0),
-(7,1, '../assets/images/products/islander_5.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(7, 6, '/Fanimation/assets/images/products/islander_1.jpg', 1),
+(7, 7, '/Fanimation/assets/images/products/islander_2.jpg', 0),
+(7, 4, '/Fanimation/assets/images/products/islander_3.jpg', 0),
+(7, 7, '/Fanimation/assets/images/products/islander_4.jpg', 0),
+(7, 1, '/Fanimation/assets/images/products/islander_5.jpg', 0);
 
 -- Kerring (id = 8)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(8, 7,'../assets/images/products/kerring_1.jpg', 1),
-(8, 1,'../assets/images/products/kerring_2.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(8, 7, '/Fanimation/assets/images/products/kerring_1.jpg', 1),
+(8, 1, '/Fanimation/assets/images/products/kerring_2.jpg', 0);
 
 -- Klear (id = 9)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(9,2, '../assets/images/products/klear_1.jpg', 1),
-(9, 7,'../assets/images/products/klear_2.jpg', 0),
-(9, 7,'../assets/images/products/klear_3.jpg', 0),
-(9, 1,'../assets/images/products/klear_4.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(9, 2, '/Fanimation/assets/images/products/klear_1.jpg', 1),
+(9, 7, '/Fanimation/assets/images/products/klear_2.jpg', 0),
+(9, 7, '/Fanimation/assets/images/products/klear_3.jpg', 0),
+(9, 1, '/Fanimation/assets/images/products/klear_4.jpg', 0);
 
 -- Klich (id = 10)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(10, 2,'../assets/images/products/klinch_1.jpg', 1),
-(10, 3,'../assets/images/products/klinch_2.jpg', 0),
-(10, 1,'../assets/images/products/klinch_3.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(10, 2, '/Fanimation/assets/images/products/klinch_1.jpg', 1),
+(10, 3, '/Fanimation/assets/images/products/klinch_2.jpg', 0),
+(10, 1, '/Fanimation/assets/images/products/klinch_3.jpg', 0);
 
 -- Klout (id = 11)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(11, 7,'../assets/images/products/klout_1.jpg', 1),
-(11, 1,'../assets/images/products/klout_2.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(11, 7, '/Fanimation/assets/images/products/klout_1.jpg', 1),
+(11, 1, '/Fanimation/assets/images/products/klout_2.jpg', 0);
 
 -- Kute (id = 12)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(12, 5,'../assets/images/products/kute_1.jpg', 1),
-(12,2, '../assets/images/products/kute_2.jpg', 0),
-(12, 3,'../assets/images/products/kute_3.jpg', 0),
-(12, 7,'../assets/images/products/kute_4.jpg', 0),
-(12, 2,'../assets/images/products/kute_5.jpg', 0),
-(12, 1,'../assets/images/products/kute_6.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(12, 5, '/Fanimation/assets/images/products/kute_1.jpg', 1),
+(12, 2, '/Fanimation/assets/images/products/kute_2.jpg', 0),
+(12, 3, '/Fanimation/assets/images/products/kute_3.jpg', 0),
+(12, 7, '/Fanimation/assets/images/products/kute_4.jpg', 0),
+(12, 2, '/Fanimation/assets/images/products/kute_5.jpg', 0),
+(12, 1, '/Fanimation/assets/images/products/kute_6.jpg', 0);
 
 -- Kwartet (id = 13)
-INSERT INTO product_images (product_id,color_id , image_url, u_primary) VALUES
-(13,2, '../assets/images/products/kwartet_1.jpg', 1),
-(13, 3,'../assets/images/products/kwartet_2.jpg', 0),
-(13, 7,'../assets/images/products/kwartet_3.jpg', 0);
+INSERT INTO product_images (product_id, color_id, image_url, u_primary) VALUES
+(13, 2, '/Fanimation/assets/images/products/kwartet_1.jpg', 1),
+(13, 3, '/Fanimation/assets/images/products/kwartet_2.jpg', 0),
+(13, 7, '/Fanimation/assets/images/products/kwartet_3.jpg', 0);
 
 -- Insert sample orders
 INSERT INTO orders (user_id, status, created_at, fullname, email, phone_number, address, note, total_money, payment_status)
@@ -423,6 +418,7 @@ VALUES
     (2, 'processing', '2025-06-05 09:15:00', 'John Doe', 'john.doe@example.com', '0987654321', '456 Elm Street, Sample City', 'Include installation guide.', 720.75, 'pending'),
     (3, 'shipped', '2025-05-20 14:00:00', 'Jane Smith', 'jane.smith@example.com', '0912345678', '789 Oak Avenue, Test Town', 'Urgent delivery.', 250.00, 'completed'),
     (1, 'cancelled', '2025-05-15 11:45:00', 'Admin User', 'admin@example.com', '0123456789', '123 Admin Street, Admin City', 'Cancelled due to wrong item.', 180.25, 'pending');
+
 
 -- Insert into order_items
 INSERT INTO order_items (order_id, product_variant_id, quantity, price, total_money, payment_method)
