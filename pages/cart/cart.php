@@ -68,19 +68,16 @@ function getColorHex($color_id) {
 <style>
 .body-container {
     height: 60vh;
-    /* display: flex; */
     justify-content: center;
-    align-items: flex-start; /* Để bảng nằm trên cùng, không giữa dọc */
-    padding-top: 20px; /* Khoảng cách từ đầu trang */
+    align-items: flex-start;
+    padding-top: 20px;
 }
 
 .table-bordered {
     width: 70%;
-    margin: 0 auto; /* Căn giữa theo chiều ngang */
-    border-collapse: collapse; /* Đảm bảo viền liền mạch */
+    margin: 0 auto;
+    border-collapse: collapse;
 }
-
-
 </style>
 <div class="body-container mt-4">
     <h2 class="text-center">Giỏ hàng</h2>
@@ -90,6 +87,7 @@ function getColorHex($color_id) {
         <table class="table table-bordered">
             <thead>
                 <tr>
+                    <th><input type="checkbox" id="select-all" checked> Chọn</th>
                     <th>Sản phẩm</th>
                     <th>Màu</th>
                     <th>Kích thước</th>
@@ -114,6 +112,7 @@ function getColorHex($color_id) {
                     $total += $subtotal;
                 ?>
                     <tr data-cart-id="<?php echo htmlspecialchars($cart_id); ?>" data-price="<?php echo htmlspecialchars($price); ?>">
+                        <td><input type="checkbox" class="select-item" data-cart-id="<?php echo htmlspecialchars($cart_id); ?>" checked></td>
                         <td><?php echo htmlspecialchars($name); ?></td>
                         <td style="background-color: <?php echo htmlspecialchars($color); ?>;"></td>
                         <td><?php echo htmlspecialchars($size); ?></td>
@@ -129,14 +128,14 @@ function getColorHex($color_id) {
                     </tr>
                 <?php endforeach; ?>
                 <tr>
-                    <td colspan="4"><b>Tổng cộng:</b></td>
+                    <td colspan="5"><b>Tổng cộng:</b></td>
                     <td id="total"><?php echo number_format($total, 0, '', '.'); ?> $</td>
                     <td></td>
                 </tr>
             </tbody>
         </table>
-        <div class="text-center mt-3"> <!-- Căn giữa nút Thanh toán -->
-            <a href="checkout.php?items=<?php echo htmlspecialchars(implode(',', array_column($_SESSION['cart'], 'cart_id'))); ?>" class="btn btn-success">Thanh toán</a>
+        <div class="text-center mt-3">
+            <button class="btn btn-success" id="checkout-btn" disabled>Thanh toán</button>
         </div>
         <?php if ($user_id === null): ?>
             <p class="text-center mt-3">
@@ -151,6 +150,46 @@ function getColorHex($color_id) {
 
 <script>
 $(document).ready(function() {
+    // Select all checkbox
+    $('#select-all').on('change', function() {
+        $('.select-item').prop('checked', $(this).prop('checked'));
+        updateCheckoutButton();
+    });
+
+    // Individual item checkbox
+    $('.select-item').on('change', function() {
+        if (!$(this).prop('checked')) {
+            $('#select-all').prop('checked', false);
+        } else if ($('.select-item:checked').length === $('.select-item').length) {
+            $('#select-all').prop('checked', true);
+        }
+        updateCheckoutButton();
+    });
+
+    // Update checkout button state
+    function updateCheckoutButton() {
+        const selectedItems = $('.select-item:checked').length;
+        $('#checkout-btn').prop('disabled', selectedItems === 0);
+    }
+
+    // Checkout button click
+    $('#checkout-btn').click(function() {
+        const selectedCartIds = $('.select-item:checked').map(function() {
+            return $(this).data('cart-id');
+        }).get();
+        if (selectedCartIds.length === 0) {
+            Swal.fire({
+                title: 'Lỗi',
+                text: 'Vui lòng chọn ít nhất một sản phẩm để thanh toán.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#d33'
+            });
+            return;
+        }
+        window.location.href = 'checkout.php?items=' + encodeURIComponent(selectedCartIds.join(','));
+    });
+
     $('.increase-btn').click(function() {
         var cart_id = $(this).data('cart-id');
         updateCart(cart_id, 'increase');
@@ -206,11 +245,7 @@ $(document).ready(function() {
                     var newSubtotal = price * newQty;
                     subtotalElement.text(newSubtotal.toLocaleString('vi-VN') + ' $');
 
-                    var totalElement = $('#total');
-                    var currentTotal = parseFloat(totalElement.text().replace(/[^0-9.-]+/g, ""));
-                    var delta = action === 'increase' ? price : -price;
-                    var newTotal = currentTotal + delta;
-                    totalElement.text(newTotal.toLocaleString('vi-VN') + ' $');
+                    updateTotal();
                 } else {
                     Swal.fire({
                         title: 'Lỗi',
@@ -245,17 +280,11 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(response) {
                 if (response.status === 'success') {
-                    var qty = parseInt($('#qty-' + cart_id).text());
-                    var price = parseFloat($('tr[data-cart-id="' + cart_id + '"]').data('price'));
                     $('tr[data-cart-id="' + cart_id + '"]').remove();
-
-                    var totalElement = $('#total');
-                    var currentTotal = parseFloat(totalElement.text().replace(/[^0-9.-]+/g, ""));
-                    var newTotal = currentTotal - (price * qty);
-                    totalElement.text(newTotal.toLocaleString('vi-VN') + ' $');
+                    updateTotal();
 
                     if ($('tbody tr').length === 1) {
-                        $('.container.mt-4').html('<p class="text-center">Giỏ hàng của bạn đang trống.</p>');
+                        $('.body-container.mt-4').html('<p class="text-center">Giỏ hàng của bạn đang trống.</p>');
                     }
 
                     Swal.fire({
@@ -287,6 +316,21 @@ $(document).ready(function() {
             }
         });
     }
+
+    function updateTotal() {
+        var total = 0;
+        $('.select-item:checked').each(function() {
+            var cart_id = $(this).data('cart-id');
+            var qty = parseInt($('#qty-' + cart_id).text());
+            var price = parseFloat($('tr[data-cart-id="' + cart_id + '"]').data('price'));
+            total += price * qty;
+        });
+        $('#total').text(total.toLocaleString('vi-VN') + ' $');
+        updateCheckoutButton();
+    }
+
+    // Initial update of checkout button state
+    updateCheckoutButton();
 });
 </script>
 
