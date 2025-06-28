@@ -315,11 +315,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <p class="font-semibold"><?php echo htmlspecialchars($item['name'] ?? 'Tên sản phẩm không có'); ?></p>
                                 <p>Số lượng: <?php echo $item['quantity'] ?? 0; ?></p>
                                 <p>Màu: <span style="display: inline-block; width: 20px; height: 20px; background-color: <?php echo htmlspecialchars($color_hex); ?>;"></span></p>
-                                <p><?php echo number_format(($item['price'] ?? 0) * ($item['quantity'] ?? 0), 0, '', '.'); ?> VNĐ</p>
+                                <p><?php echo number_format(($item['price'] ?? 0) * ($item['quantity'] ?? 0), 0, '', '.'); ?> $</p>
                             </div>
                         </div>
                     <?php endforeach; ?>
-                    <p class="text-xl font-bold">Tổng cộng: <?php echo number_format($total, 0, '', '.'); ?> VNĐ</p>
+                    <p class="text-xl font-bold">Tổng cộng: <?php echo number_format($total, 0, '', '.'); ?> $</p>
                 <?php endif; ?>
             </div>
         </div>
