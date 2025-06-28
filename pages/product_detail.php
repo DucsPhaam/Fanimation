@@ -312,6 +312,12 @@ if ($stmt === false) {
         height: 0;
         overflow: hidden;
     }
+
+    .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
 </style>
 
 <div class="w-90 mx-auto">
@@ -411,10 +417,14 @@ if ($stmt === false) {
                     <?php echo number_format($product['product_price'], 0, ',', '.'); ?>$
                 </div>
 
-                <button class="btn btn-danger add-to-cart"
-                    data-id="<?php echo $product['product_id']; ?>">
-                    MUA NGAY
-                </button>
+                <div class="button-group">
+                    <button class="btn btn-primary add-to-cart" data-id="<?php echo $product['product_id']; ?>">
+                        Thêm vào giỏ hàng
+                    </button>
+                    <button class="btn btn-danger buy-now" data-id="<?php echo $product['product_id']; ?>">
+                        MUA NGAY
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -592,6 +602,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const stockDisplay = document.getElementById('stock-display');
     const quantityInput = document.getElementById('quantity');
     const addToCartButton = document.querySelector('.add-to-cart');
+    const buyNowButton = document.querySelector('.buy-now');
     let selectedColorId = null;
 
     document.querySelectorAll('.color-circle').forEach(circle => {
@@ -644,90 +655,103 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    function addToCart(productId, quantity, colorId, redirect = false) {
+        if (!colorId || colorId === '0' || colorId === null) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Chưa chọn màu',
+                text: 'Vui lòng chọn màu sắc trước khi thêm vào giỏ hàng!'
+            });
+            return;
+        }
+
+        const stock = parseInt(document.querySelector('.color-circle.selected').getAttribute('data-stock'));
+        if (parseInt(quantity) > stock) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi số lượng',
+                text: 'Số lượng vượt quá tồn kho!'
+            });
+            return;
+        }
+
+        console.log('Sending to add_to_cart:', {
+            action: 'add',
+            productId,
+            colorId,
+            quantity,
+            sessionId: '<?php echo htmlspecialchars($_SESSION['guest_session_id']); ?>'
+        });
+
+        fetch('/Fanimation/pages/cart/add_to_cart.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `action=add&product_id=${productId}&color_id=${colorId}&quantity=${quantity}&session_id=<?php echo htmlspecialchars($_SESSION['guest_session_id']); ?>`
+        })
+        .then(response => {
+            console.log('Response status:', response.status, 'URL:', response.url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(text => {
+            try {
+                const cartData = JSON.parse(text);
+                console.log('Response from add_to_cart:', cartData);
+                if (cartData.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công',
+                        text: cartData.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        if (redirect) {
+                            window.location.href = '/Fanimation/pages/cart/cart.php';
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: cartData.message || 'Lỗi không xác định từ máy chủ'
+                    });
+                }
+            } catch (e) {
+                console.error('Invalid JSON response:', text);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Phản hồi không phải JSON hợp lệ'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error adding to cart:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: 'Lỗi khi thêm vào giỏ hàng: ' + error.message
+            });
+        });
+    }
+
     if (addToCartButton) {
         addToCartButton.addEventListener('click', function() {
             const productId = this.getAttribute('data-id');
             const quantity = document.getElementById('quantity').value;
+            addToCart(productId, quantity, selectedColorId, false);
+        });
+    }
 
-            if (!selectedColorId || selectedColorId === '0' || selectedColorId === null) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Chưa chọn màu',
-                    text: 'Vui lòng chọn màu sắc trước khi thêm vào giỏ hàng!'
-                });
-                return;
-            }
-
-            const stock = parseInt(document.querySelector('.color-circle.selected').getAttribute('data-stock'));
-            if (parseInt(quantity) > stock) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi số lượng',
-                    text: 'Số lượng vượt quá tồn kho!'
-                });
-                return;
-            }
-
-            console.log('Sending to add_to_cart:', {
-                action: 'add',
-                productId,
-                colorId: selectedColorId,
-                quantity,
-                sessionId: '<?php echo htmlspecialchars($_SESSION['guest_session_id']); ?>'
-            });
-
-            fetch('/Fanimation/pages/cart/add_to_cart.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `action=add&product_id=${productId}&color_id=${selectedColorId}&quantity=${quantity}&session_id=<?php echo htmlspecialchars($_SESSION['guest_session_id']); ?>`
-            })
-            .then(response => {
-                console.log('Response status:', response.status, 'URL:', response.url);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(text => {
-                try {
-                    const cartData = JSON.parse(text);
-                    console.log('Response from add_to_cart:', cartData);
-                    if (cartData.status === 'success') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Thành công',
-                            text: cartData.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => {
-                            window.location.href = '/Fanimation/pages/cart/cart.php';
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Lỗi',
-                            text: cartData.message || 'Lỗi không xác định từ máy chủ'
-                        });
-                    }
-                } catch (e) {
-                    console.error('Invalid JSON response:', text);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Lỗi',
-                        text: 'Phản hồi không phải JSON hợp lệ'
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error adding to cart:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi',
-                    text: 'Lỗi khi thêm vào giỏ hàng: ' + error.message
-                });
-            });
+    if (buyNowButton) {
+        buyNowButton.addEventListener('click', function() {
+            const productId = this.getAttribute('data-id');
+            const quantity = document.getElementById('quantity').value;
+            addToCart(productId, quantity, selectedColorId, true);
         });
     }
 
