@@ -54,6 +54,18 @@ $brands = getBrands($conn);
         transform: scale(1.2);
     }
 
+    .product-card {
+        position: relative;
+        width: 100%;
+        height: auto;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
     .product-card .image-container {
         position: relative;
         width: 100%;
