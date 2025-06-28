@@ -62,7 +62,7 @@ $search = isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '';
         /* Sửa dropdown menu để không che các liên kết */
         .dropdown-menu {
             position: absolute;
-            top: 100%; /* Đảm bảo menu xuất hiện bên dưới */
+            top: 80%; /* Đảm bảo menu xuất hiện bên dưới */
             margin-top: 5px; /* Khoảng cách nhỏ từ liên kết cha */
             z-index: 1000; /* Đảm bảo menu nằm trên các phần tử khác */
             background-color: #fff;
@@ -98,7 +98,7 @@ $search = isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '';
         /* Tinh chỉnh user-dropdown để nhất quán */
         .user-dropdown .dropdown-menu {
             min-width: 150px;
-            margin-top: 10px;
+            margin-top: 0;
             border: 1px solid #ddd;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             opacity: 0;
@@ -193,26 +193,24 @@ $search = isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '';
             </div>
             <div class="user-dropdown">
                 <ul class="navbar-nav mx-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="../" data-bs-toggle="dropdown" aria-label="User menu">
-                            <i class="bi bi-person-circle"></i>
-                        </a>
-                        <?php 
-                        if(!isset($_SESSION["user_id"])){
-                        ?>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="<?php echo $login_url; ?>">Log In</a></li>
-                            <li><a class="dropdown-item" href="<?php echo $register_url; ?>">Register</a></li>
-                            <li><a class="dropdown-item" href="<?php echo $my_order_url; ?>">My Order</a></li>
-                        </ul>
-                        <?php }else{?>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="<?php echo $logout_url; ?>">Log Out</a></li>
-                            <li><a class="dropdown-item" href="<?php echo $profile_url; ?>">Profile Information</a></li>
-                            <li><a class="dropdown-item" href="<?php echo $my_order_url; ?>">My Order</a></li>
-                        </ul>
-                        <?php }?>
-                    </li>
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-label="User menu">
+                    <i class="bi bi-person-circle"></i>
+                </a>
+                <?php if (!isset($_SESSION["user_id"])) { ?>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="<?php echo $login_url; ?>">Log In</a></li>
+                    <li><a class="dropdown-item" href="<?php echo $register_url; ?>">Register</a></li>
+                    <li><a class="dropdown-item" href="<?php echo $my_order_url; ?>">My Order</a></li>
+                </ul>
+                <?php } else { ?>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="<?php echo $logout_url; ?>">Log Out</a></li>
+                    <li><a class="dropdown-item" href="<?php echo $profile_url; ?>">Profile Information</a></li>
+                    <li><a class="dropdown-item" href="<?php echo $my_order_url; ?>">My Order</a></li>
+                </ul>
+                <?php } ?>
+                </li>
                 </ul>
             </div>
         </div>
@@ -220,27 +218,47 @@ $search = isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '';
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Khởi tạo dropdown của Bootstrap
-        var dropdownElements = document.querySelectorAll('.dropdown-toggle');
-        dropdownElements.forEach(function (dropdownToggleEl) {
-            new bootstrap.Dropdown(dropdownToggleEl);
+document.addEventListener('DOMContentLoaded', function () {
+    // Khởi tạo dropdown của Bootstrap
+    var dropdownElements = document.querySelectorAll('.dropdown-toggle');
+    dropdownElements.forEach(function (dropdownToggleEl) {
+        new bootstrap.Dropdown(dropdownToggleEl);
+    });
+
+    // Hỗ trợ hover cho tất cả dropdown (bao gồm user-dropdown)
+    const dropdowns = document.querySelectorAll('.dropdown, .user-dropdown');
+    dropdowns.forEach(function (dropdown) {
+        dropdown.addEventListener('mouseenter', function () {
+            const dropdownMenu = this.querySelector('.dropdown-menu');
+            const dropdownToggle = this.querySelector('.dropdown-toggle');
+            if (dropdownMenu && dropdownToggle) {
+                dropdownMenu.classList.add('show');
+                dropdownToggle.setAttribute('aria-expanded', 'true');
+            }
         });
-
-        // Logic để highlight liên kết điều hướng
-        const navLinks = document.querySelectorAll('.navbar-nav .nav-link:not(.dropdown-toggle)');
-        const currentPath = window.location.pathname;
-
-        navLinks.forEach(link => {
-            // So sánh href của liên kết với đường dẫn hiện tại
-            const linkPath = new URL(link.href).pathname;
-            if (linkPath === currentPath || (linkPath === '<?php echo $index_url; ?>' && currentPath === '/')) {
-                link.classList.add('active');
-            } else {
-                link.classList.remove('active');
+        dropdown.addEventListener('mouseleave', function () {
+            const dropdownMenu = this.querySelector('.dropdown-menu');
+            const dropdownToggle = this.querySelector('.dropdown-toggle');
+            if (dropdownMenu && dropdownToggle) {
+                dropdownMenu.classList.remove('show');
+                dropdownToggle.setAttribute('aria-expanded', 'false');
             }
         });
     });
+
+    // Logic để highlight liên kết điều hướng
+    const navLinks = document.querySelectorAll('.navbar-nav .nav-link:not(.dropdown-toggle)');
+    const currentPath = window.location.pathname;
+
+    navLinks.forEach(link => {
+        const linkPath = new URL(link.href).pathname;
+        if (linkPath === currentPath || (linkPath === '<?php echo $index_url; ?>' && currentPath === '/')) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+});
     </script>
 </body>
 </html>
