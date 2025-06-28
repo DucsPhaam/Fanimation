@@ -113,21 +113,82 @@ if (!$error) {
                 </div>
             </div>
 
-            <!-- Phần Thông Tin Chuyển Khoản -->
+            <!-- Phần Chọn Phương Thức Thanh Toán -->
             <div class="mt-6">
-                <h2 class="text-2xl font-semibold mb-4">Thông Tin Chuyển Khoản</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <p><strong>Ví điện tử:</strong> Viettel Money</p>
+                <h2 class="text-2xl font-semibold mb-4">Chọn Phương Thức Thanh Toán</h2>
+                <div class="mb-4">
+                    <label class="inline-flex items-center mr-4">
+                        <input type="radio" name="payment_method" value="viettel_money" class="payment-radio form-radio h-5 w-5 text-blue-600" checked>
+                        <span class="ml-2">Viettel Money</span>
+                    </label>
+                    <label class="inline-flex items-center mr-4">
+                        <input type="radio" name="payment_method" value="momo" class="payment-radio form-radio h-5 w-5 text-blue-600">
+                        <span class="ml-2">Momo</span>
+                    </label>
+                    <label class="inline-flex items-center mr-4">
+                        <input type="radio" name="payment_method" value="zalopay" class="payment-radio form-radio h-5 w-5 text-blue-600">
+                        <span class="ml-2">ZaloPay</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="payment_method" value="bank" class="payment-radio form-radio h-5 w-5 text-blue-600">
+                        <span class="ml-2">Thẻ Ngân Hàng</span>
+                    </label>
+                </div>
+
+                <!-- Phần Thông Tin Thanh Toán -->
+                <div id="payment-details" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Viettel Money -->
+                    <div id="viettel_money" class="payment-method">
+                        <h3 class="text-lg font-semibold mb-2">Viettel Money</h3>
                         <p><strong>Số Tài Khoản:</strong> 0231253646</p>
                         <p><strong>Chủ Tài Khoản:</strong> Vu Cong Thanh</p>
                         <p><strong>Nội Dung Chuyển Khoản:</strong> Thanh toán đơn hàng #<?php echo htmlspecialchars($order['id']); ?></p>
-                        <p class="text-red-500 mt-2">Vui lòng chuyển khoản số tiền <strong><?php echo number_format($order['total_money'], 0, '', '.'); ?> $</strong> để hoàn tất đơn hàng.</p>
+                        <p class="text-red-500 mt-2">Vui lòng chuyển khoản số tiền <strong><?php echo number_format($order['total_money'], 0, '', '.'); ?> $</strong>.</p>
                     </div>
-                    <div class="text-center">
-                        <h3 class="text-lg font-semibold mb-2">Quét mã QR để thanh toán</h3>
-                        <img src="../../assets/images/bank.jpg" alt="QR Code Thanh Toán" class="mx-auto h-48 w-48 object-contain">
-                        <p class="text-gray-600 mt-2">Sử dụng ứng dụng ngân hàng để quét mã QR và thanh toán.</p>
+                    <div id="viettel_money_qr" class="payment-method text-center">
+                        <h3 class="text-lg font-semibold mb-2">Quét mã QR Viettel Money</h3>
+                        <img src="../../assets/images/bank.jpg" alt="QR Code Viettel Money" class="mx-auto h-48 w-48 object-contain">
+                        <p class="text-gray-600 mt-2">Sử dụng ứng dụng Viettel Money để quét mã QR.</p>
+                    </div>
+                    <!-- Momo -->
+                    <div id="momo" class="payment-method hidden">
+                        <h3 class="text-lg font-semibold mb-2">Momo</h3>
+                        <p><strong>Số Điện Thoại:</strong> 0987654321</p>
+                        <p><strong>Chủ Tài Khoản:</strong> Vu Cong Thanh</p>
+                        <p><strong>Nội Dung Chuyển Khoản:</strong> Thanh toán đơn hàng #<?php echo htmlspecialchars($order['id']); ?></p>
+                        <p class="text-red-500 mt-2">Vui lòng chuyển khoản số tiền <strong><?php echo number_format($order['total_money'], 0, '', '.'); ?> $</strong>.</p>
+                    </div>
+                    <div id="momo_qr" class="payment-method text-center hidden">
+                        <h3 class="text-lg font-semibold mb-2">Quét mã QR Momo</h3>
+                        <img src="../../assets/images/bank.jpg" alt="QR Code Momo" class="mx-auto h-48 w-48 object-contain">
+                        <p class="text-gray-600 mt-2">Sử dụng ứng dụng Momo để quét mã QR.</p>
+                    </div>
+                    <!-- ZaloPay -->
+                    <div id="zalopay" class="payment-method hidden">
+                        <h3 class="text-lg font-semibold mb-2">ZaloPay</h3>
+                        <p><strong>Số Điện Thoại:</strong>PO 0912345678</p>
+                        <p><strong>Chủ Tài Khoản:</strong> Vu Cong Thanh</p>
+                        <p><strong>Nội Dung Chuyển Khoản:</strong> Thanh toán đơn hàng #<?php echo htmlspecialchars($order['id']); ?></p>
+                        <p class="text-red-500 mt-2">Vui lòng chuyển khoản số tiền <strong><?php echo number_format($order['total_money'], 0, '', '.'); ?> $</strong>.</p>
+                    </div>
+                    <div id="zalopay_qr" class="payment-method text-center hidden">
+                        <h3 class="text-lg font-semibold mb-2">Quét mã QR ZaloPay</h3>
+                        <img src="../../assets/images/bank.jpg" alt="QR Code ZaloPay" class="mx-auto h-48 w-48 object-contain">
+                        <p class="text-gray-600 mt-2">Sử dụng ứng dụng ZaloPay để quét mã QR.</p>
+                    </div>
+                    <!-- Thẻ Ngân Hàng -->
+                    <div id="bank" class="payment-method hidden">
+                        <h3 class="text-lg font-semibold mb-2">Thẻ Ngân Hàng</h3>
+                        <p><strong>Ngân Hàng:</strong> Vietcombank</p>
+                        <p><strong>Số Tài Khoản:</strong> 1234567890123</p>
+                        <p><strong>Chủ Tài Khoản:</strong> Vu Cong Thanh</p>
+                        <p><strong>Nội Dung Chuyển Khoản:</strong> Thanh toán đơn hàng #<?php echo htmlspecialchars($order['id']); ?></p>
+                        <p class="text-red-500 mt-2">Vui lòng chuyển khoản số tiền <strong><?php echo number_format($order['total_money'], 0, '', '.'); ?> $</strong>.</p>
+                    </div>
+                    <div id="bank_qr" class="payment-method text-center hidden">
+                        <h3 class="text-lg font-semibold mb-2">Quét mã QR Ngân Hàng</h3>
+                        <img src="../../assets/images/bank.jpg" alt="QR Code Ngân Hàng" class="mx-auto h-48 w-48 object-contain">
+                        <p class="text-gray-600 mt-2">Sử dụng ứng dụng ngân hàng để quét mã QR.</p>
                     </div>
                 </div>
             </div>
@@ -136,6 +197,7 @@ if (!$error) {
             <div class="mt-6 text-center">
                 <form method="POST" action="confirm_payment.php" id="paymentForm">
                     <input type="hidden" name="order_id" value="<?php echo htmlspecialchars($order['id'] ?? ''); ?>">
+                    <input type="hidden" name="payment_method" id="selected_payment_method" value="viettel_money">
                     <?php
                     if (!isset($_SESSION['csrf_token'])) {
                         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -144,7 +206,7 @@ if (!$error) {
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded" id="confirmPayment">Xác Nhận Thanh Toán</button>
                 </form>
-                <p class="text-red-500 mt-2">Lưu ý: Chỉ nhấn xác nhận khi đã hoàn tất chuyển khoản.</p>
+                <p class="text-red-500 mt-2">Lưu ý: Vui lòng chọn phương thức thanh toán và hoàn tất chuyển khoản trước khi xác nhận.</p>
             </div>
         <?php endif; ?>
     </div>
@@ -160,8 +222,27 @@ if (!$error) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
+            // Handle radio button change
+            $('.payment-radio').on('change', function() {
+                const selectedMethod = $(this).val();
+                $('.payment-method').addClass('hidden');
+                $('#' + selectedMethod).removeClass('hidden');
+                $('#' + selectedMethod + '_qr').removeClass('hidden');
+                $('#selected_payment_method').val(selectedMethod);
+            });
+
             $('#confirmPayment').click(function(e) {
                 e.preventDefault();
+                const selectedMethod = $('#selected_payment_method').val();
+                if (!selectedMethod) {
+                    Swal.fire({
+                        title: 'Lỗi',
+                        text: 'Vui lòng chọn một phương thức thanh toán.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
                 Swal.fire({
                     title: 'Xác nhận thanh toán',
                     text: 'Bạn có chắc chắn đã chuyển khoản và muốn xác nhận thanh toán cho đơn hàng này?',
@@ -187,6 +268,9 @@ if (!$error) {
                     }
                 });
             });
+
+            // Trigger change event for default selected radio (Viettel Money)
+            $('input[name="payment_method"][value="viettel_money"]').trigger('change');
         });
     </script>
 
