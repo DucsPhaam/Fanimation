@@ -1,6 +1,3 @@
-# Fanimation
-for eProject 1
-
 # Fanimation - Online Fan Store Management System
 Fanimation is a web-based application designed to manage an online store specializing in fans. It includes an admin dashboard for product and user management, a user interface for shopping and profile management, and a structured backend with database integration.
 
