@@ -57,11 +57,22 @@ IV.Troubleshooting
 - Database Issues: Verify foreign key constraints and data integrity in categories, brands, and colors tables.
 - CSS/JS Not Loading: Confirm internet access for CDN resources (e.g., Bootstrap, Font Awesome) or host them locally.
 
-V.Contributing
-1.Fork the repository.
-2.Create a feature branch (git checkout -b feature-name).
-3.Commit changes (git commit -m "Description").
-4.Push to the branch (git push origin feature-name).
-5.Open a pull request.
-# Contact
-For support or questions, contact ducsphaam@gmail.com.
+V.Contributing </br>
+- 1.Fork the repository. </br>
+- 2.Create a feature branch (git checkout -b feature-name).</br>
+- 3.Commit changes (git commit -m "Description").</br>
+- 4.Push to the branch (git push origin feature-name).</br>
+- 5.Open a pull request.</br>
+  
+## Contact
+> For support or questions, feel free to contact ducsphaam@gmail.com.</br>
+> Facebook: [Đức Phạm](https://www.facebook.com/cerfx/)</br>
+> Youtube: [DucsPhaam](https://www.youtube.com/@ducsphaam)</br>
+
+## Special thanks for the collaboration:
+> [bakugo2234](https://github.com/bakugo2234)</br>
+> [kitty1657](https://github.com/kitty1657)</br>
+> [QuyDung09](https://github.com/QuyDung09)</br>
+> [thangrua](https://github.com/thangrua)</br>
+
+**© Copyright**
