@@ -15,17 +15,19 @@ Prerequisites:
 
 # Step
 1.Clone the Repository
-
+```
 git clone https://github.com/DucsPhaam/Fanimation.git
 cd Fanimation
+```
 
 2.Configure the Database
 Update includes/db_connect.php with your database credentials:
-
+```
 $host = "localhost";
 $username = "your_username";
 $password = "your_password";
 $database = "fanimation";
+```
 
 3.Set Up Permissions
 Ensure the assets/images/products/ directory is writable by the web server
