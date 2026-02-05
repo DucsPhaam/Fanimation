@@ -66,7 +66,7 @@ V.Contributing </br>
   
 ## Contact
 > For support or questions, feel free to contact ducsphaam@gmail.com.</br>
-> Facebook: [Đức Phạm](https://www.facebook.com/cerfx/)</br>
+> Facebook: [Đức Phạm](https://www.facebook.com/ducsphaam/)</br>
 > Youtube: [DucsPhaam](https://www.youtube.com/@ducsphaam)</br>
 
 ## Special thanks for the collaboration:
